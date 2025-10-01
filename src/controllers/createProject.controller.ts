@@ -9,22 +9,8 @@ const PROJECT_ID = "1b0a3369-23ea-46e1-a5e9-8a5b885e3d7e"; // replace with your 
 export const createProject = (req: Request, res: Response) => {
     try {
         const {canvasComponents} = req.body;
-    //createGNS3Project("netCareLab", PROJECT_ID);
         for (const component of canvasComponents) {
-            switch (component.type) {
-                case "router":
-                    createNode(PROJECT_ID , { name: component.name, node_type: "dynamips", compute_id: "local", x: 100, y: 100 });
-                    break;
-                case "pc":
-                    createNode(PROJECT_ID , { name: component.name, node_type: "vpcs", compute_id: "local", x: 200, y: 100 });
-                    break; 
-                case "cloud":
-                    createNode(PROJECT_ID , { name: component.name, node_type: "cloud", compute_id: "local", x: 300, y: 100 });
-                    break;
-                case "switch":
-                    createNode(PROJECT_ID , { name: component.name, node_type: "ethernet_switch", compute_id: "local", x: 400, y: 100 });
-                    break;  
-            }
+            createNode(PROJECT_ID , { name: component.name, node_type: component.node_type, compute_id: "local", x: component.x , y: component.y }); 
         }
     }
     catch (error) {

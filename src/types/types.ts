@@ -3,6 +3,9 @@ export type CanvasComponent = {
     type: 'router' | 'pc' | 'cloud' | 'switch';
     instanceId : number;
     name: string;
+    node_type: string;
+    x : number;
+    y : number;
 }
 
 export type NodeData = {
