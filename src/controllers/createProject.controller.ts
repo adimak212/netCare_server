@@ -2,15 +2,14 @@ import type { Request, Response } from "express";
 import axios from "axios";
 import { CanvasComponent , NodeData } from "../types/types";
 
-const GNS3_API = "http://localhost:3080/v2/projects"; // base API
-const PROJECT_ID = "3a733b20-8d5e-4d6b-aca8-43454b3cb410"; // replace with your GNS3 project ID
+const GNS3_API = "http://localhost:3080/v2/projects"; // base URL for GNS3 API
+const PROJECT_ID = "3a733b20-8d5e-4d6b-aca8-43454b3cb410"; 
 
 
 export const createProject = async (req: Request, res: Response) => {
     try {
-        const {canvasComponents} = req.body;
-         const response = await createGNS3Project("Test1UploadRouter");
-         console.log("GNS3 Project creation response:", response.project_id);
+        const {canvasComponents , ProjectName} = req.body;
+        const response = await createGNS3Project(ProjectName);
         for (const component of canvasComponents) {
             switch (component.id) {
                 case "router":
@@ -22,6 +21,7 @@ export const createProject = async (req: Request, res: Response) => {
                             compute_id: "local",
                             x: 100,
                             y: 100,
+                            symbol: ":/symbols/router.svg",
                             properties: {
                             platform: "c7200",
                             npe: "npe-400",
@@ -36,7 +36,61 @@ export const createProject = async (req: Request, res: Response) => {
                         { headers: { "Content-Type": "application/json" } }
                     );
                     break;
+
                 case "switch":
+                  const switchRes = await axios.post(
+                    `${GNS3_API}/${response.project_id}/nodes`,
+                    {
+                      name: "switch1",
+                      node_type: "ethernet_switch",
+                      template_id: "1966b864-93e7-32d5-965f-001384eec461",
+                      compute_id: "local",
+                      x: 300,
+                      y: 100,
+                      symbol : ":/symbols/ethernet_switch.svg" ,
+                      properties: {
+                        ports: 8, 
+                      },
+                    },
+                    { headers: { "Content-Type": "application/json" } }
+                  );
+                break;
+
+                case "pc":
+                  const pcRes = await axios.post(
+                    `${GNS3_API}/${response.project_id}/nodes`,
+                    {
+                      name: "pc1",
+                      node_type: "vpcs",
+                      template_id: "19021f99-e36f-394d-b4a1-8aaa902ab9cc",
+                      compute_id: "local",
+                      x: 500,
+                      y: 100,
+                      symbol: ":/symbols/vpcs_guest.svg",
+                      properties: {
+                        base_script_file: "vpcs_base_config.txt"
+                      }
+                    },
+                    { headers: { "Content-Type": "application/json" } }
+                  );
+                break;
+
+                case "cloud":
+                  const cloudRes =  await axios.post(
+                    `${GNS3_API}/${response.project_id}/nodes`,
+                    {
+                      name: "cloud1",
+                      node_type: "cloud",
+                      template_id: "39e257dc-8412-3174-b6b3-0ee3ed6a43e9",
+                      compute_id: "local",
+                      x: 700,
+                      y: 100,
+                      symbol: ":/symbols/cloud.svg",
+                      properties: {}
+                    },
+                    { headers: { "Content-Type": "application/json" } }
+                  );
+                break;
             }
         }
        res.status(200).json({ message: "Project creation initiated", response });
