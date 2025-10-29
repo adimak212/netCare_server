@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import axios from "axios";
-import { CanvasComponent , NodeData } from "../types/types";
+import { CanvasComponent} from "../types/types";
 
 const GNS3_API = "http://localhost:3080/v2/projects"; // base URL for GNS3 API
 const PROJECT_ID = "3a733b20-8d5e-4d6b-aca8-43454b3cb410"; 
@@ -8,7 +8,7 @@ const PROJECT_ID = "3a733b20-8d5e-4d6b-aca8-43454b3cb410";
 
 export const createProject = async (req: Request, res: Response) => {
     try {
-        const {canvasComponents , ProjectName} = req.body;
+        const {canvasComponents , ProjectName} = req.body as {canvasComponents : CanvasComponent[], ProjectName : string};
         const response = await createGNS3Project(ProjectName);
         for (const component of canvasComponents) {
             switch (component.id) {
@@ -19,8 +19,8 @@ export const createProject = async (req: Request, res: Response) => {
                             node_type: "dynamips",
                             template_id: "f5f30ee0-8e87-4cbf-8682-17e5aae51685",
                             compute_id: "local",
-                            x: 100,
-                            y: 100,
+                            x: Math.round(component.x),
+                            y: Math.round(component.y),
                             symbol: ":/symbols/router.svg",
                             properties: {
                             platform: "c7200",
@@ -45,8 +45,8 @@ export const createProject = async (req: Request, res: Response) => {
                       node_type: "ethernet_switch",
                       template_id: "1966b864-93e7-32d5-965f-001384eec461",
                       compute_id: "local",
-                      x: 300,
-                      y: 100,
+                      x: Math.round(component.x),
+                      y: Math.round(component.y),
                       symbol : ":/symbols/ethernet_switch.svg" ,
                       properties: {
                         ports: 8, 
@@ -64,8 +64,8 @@ export const createProject = async (req: Request, res: Response) => {
                       node_type: "vpcs",
                       template_id: "19021f99-e36f-394d-b4a1-8aaa902ab9cc",
                       compute_id: "local",
-                      x: 500,
-                      y: 100,
+                      x: Math.round(component.x),
+                      y: Math.round(component.y),
                       symbol: ":/symbols/vpcs_guest.svg",
                       properties: {
                         base_script_file: "vpcs_base_config.txt"
@@ -83,8 +83,8 @@ export const createProject = async (req: Request, res: Response) => {
                       node_type: "cloud",
                       template_id: "39e257dc-8412-3174-b6b3-0ee3ed6a43e9",
                       compute_id: "local",
-                      x: 700,
-                      y: 100,
+                      x: Math.round(component.x),
+                      y: Math.round(component.y),
                       symbol: ":/symbols/cloud.svg",
                       properties: {}
                     },

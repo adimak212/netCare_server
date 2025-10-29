@@ -7,11 +7,3 @@ export type CanvasComponent = {
     x : number;
     y : number;
 }
-
-export type NodeData = {
-    name: string;
-    node_type: string;
-    compute_id: string;
-    x: number;
-    y: number;
-}
