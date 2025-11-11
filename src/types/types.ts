@@ -1,9 +1,28 @@
-export type CanvasComponent = {
-    id: string;
-    type: 'router' | 'pc' | 'cloud' | 'switch';
-    instanceId : number;
-    name: string;
-    node_type: string;
-    x : number;
-    y : number;
+import { Interface } from "readline";
+
+export interface Dictionary<T> {
+  [key: string]: T;
 }
+
+export type Component = {
+  id: string;
+  name: string;
+  modelType: string;
+  x: number;
+  y: number;
+  deviceType: number;
+  ports: [];
+};
+
+export type LinkComp = {
+  port: string;
+  instanceId: number;
+  port_number: number;
+  index: number;
+  adapter_number: number;
+};
+
+export type Link = {
+  from: LinkComp;
+  to: LinkComp;
+};
