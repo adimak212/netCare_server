@@ -5,7 +5,7 @@ export interface Dictionary<T> {
 }
 
 export type Component = {
-  id: string;
+  node_id: string;
   name: string;
   modelType: string;
   x: number;
@@ -16,13 +16,14 @@ export type Component = {
 
 export type LinkComp = {
   port: string;
-  instanceId: number;
+  node_id: string;
   port_number: number;
   index: number;
   adapter_number: number;
 };
 
 export type Link = {
+  link_id : string;
   from: LinkComp;
   to: LinkComp;
 };

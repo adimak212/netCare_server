@@ -18,7 +18,7 @@ app.use(
 
 // Use hello routes
 
-app.use("/", indexRouter);
+app.use("/v1", indexRouter);
 
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);

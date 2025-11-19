@@ -1,5 +1,5 @@
 class Device {
-  id?: number;
+  node_id?: string;
   modelType?: string;
   icon?: string;
   x?: number;
@@ -18,12 +18,12 @@ class Device {
 }
 
 class PC extends Device {
-  constructor(id: number, x: number, y: number) {
+  constructor(id: string, x: number, y: number) {
     super();
     this.x = x;
     this.y = y;
     this.modelType = "";
-    this.id = id;
+    this.node_id = id;
     this.deviceType = "vpcs";
     this.ports = [{
       link_type: "ethernet",
@@ -36,7 +36,7 @@ class PC extends Device {
 
 class Switch extends Device {
   constructor(
-    id: number,
+    id: string,
     modelType: string,
     x: number,
     y: number,
@@ -50,7 +50,7 @@ class Switch extends Device {
     super();
     this.x = x;
     this.y = y;
-    this.id = id;
+    this.node_id = id;
     this.modelType = modelType;
     this.deviceType = "ethernet_switch";
     this.ports = ports;
@@ -61,7 +61,7 @@ class Switch extends Device {
 
 class Router extends Device {
   constructor(
-    id: number,
+    id: string,
     modelType: string,
     x: number,
     y: number,
@@ -74,7 +74,7 @@ class Router extends Device {
     super();
     this.x = x;
     this.y = y;
-    this.id = id;
+    this.node_id = id;
     this.modelType = modelType;
     this.deviceType = "dynamips";
     this.ports = ports;
@@ -84,14 +84,14 @@ class Router extends Device {
 
 class Cloud extends Device {
   constructor(
-    id: number, 
+    id: string, 
     x: number,
     y: number,
   ){
     super();
     this.x = x;
     this.y = y;
-    this.id = id;
+    this.node_id = id;
     this.ports =[{
       link_type: "ethernet",
       port_number: 0,

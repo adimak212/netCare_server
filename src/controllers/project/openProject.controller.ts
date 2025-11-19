@@ -4,10 +4,10 @@ import axios from "axios";
 
 const GNS3_API = "http://localhost:3080/v2/projects";
 
-export const openPick = async (req : Request , res : Response) => {
+export const openProject = async (req : Request , res : Response) => {
     try {
         const {id} = req.body.params;
-        console.log(id);
+        //console.log(id);
         const response = await axios.post(`${GNS3_API}/${id}/open`);
         res.status(200).json({message : "project opend successfully" , data : id})
     } catch (error) {

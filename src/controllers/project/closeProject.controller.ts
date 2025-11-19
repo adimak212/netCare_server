@@ -7,7 +7,7 @@ const GNS3_API = "http://localhost:3080/v2/projects";
 export const closeProject = async (req : Request , res : Response) => {
     try {
         const {id} = req.body.params;
-        console.log(id);
+        //console.log(id);
         const response = await axios.post(`${GNS3_API}/${id}/close`);
         res.status(200).json({message : "project closed successfully" , data : id})
     } catch (error) {

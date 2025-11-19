@@ -5,7 +5,7 @@ const GNS3_API = "http://localhost:3080/v2/projects";
 
 export const deleteProject = async (req :Request , res: Response) => {
     const id = req.query.id as string;
-    console.log(id);
+    //console.log(id);
     try {
         const response = await axios.delete(`${GNS3_API}/${id}`);
         res.status(200).send("project deleted")     
