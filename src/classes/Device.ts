@@ -4,16 +4,12 @@ class Device {
   icon?: string;
   x?: number;
   y?: number;
-  deviceType?: "ethernet_switch" | "dynamips" | "vpcs" | "cloud";
+  node_type?: "ethernet_switch" | "dynamips" | "vpcs" | "cloud";
   ports?: {
     link_type: string,
     port_number: number,
     short_name:string
   }[];
-  takenPorts?: {
-    takenPort: number;
-    connectedTo: { port: string; device: Device; instanceId: number };
-  }[] | undefined;
   name? : string;
 }
 
@@ -24,7 +20,7 @@ class PC extends Device {
     this.y = y;
     this.modelType = "";
     this.node_id = id;
-    this.deviceType = "vpcs";
+    this.node_type = "vpcs";
     this.ports = [{
       link_type: "ethernet",
       port_number: 0,
@@ -52,7 +48,7 @@ class Switch extends Device {
     this.y = y;
     this.node_id = id;
     this.modelType = modelType;
-    this.deviceType = "ethernet_switch";
+    this.node_type = "ethernet_switch";
     this.ports = ports;
     this.name = "Switch";
   }
@@ -76,7 +72,7 @@ class Router extends Device {
     this.y = y;
     this.node_id = id;
     this.modelType = modelType;
-    this.deviceType = "dynamips";
+    this.node_type = "dynamips";
     this.ports = ports;
     this.name = "Router";
   }
@@ -97,7 +93,7 @@ class Cloud extends Device {
       port_number: 0,
       short_name:"e0"
     }];
-    this.deviceType = "cloud"
+    this.node_type = "cloud"
     this.modelType = ""
     this.name = "Cloud";
   }

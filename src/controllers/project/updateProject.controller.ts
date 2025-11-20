@@ -10,34 +10,35 @@ const GNS3_API = "http://localhost:3080/v2/projects";
 
 export async function updateProject(req: Request, res: Response) {
   try {
-    const { canvasComponents, ProjectName, connections, id } = req.body as {
+    const { canvasComponents, connections, id } = req.body as {
       canvasComponents: Device[];
-      ProjectName: string;
       connections: Link[];
       id: string;
     };
-    let devices: Component[] | null = await getNodesFromProject(id);
+    let devices: Device[] | null = await getNodesFromProject(id);
     let links: Link[] | null = await getLinksFromProject(id);
 
-    addOrDeleteNodes("add", devices, id, canvasComponents);
-    addOrDeleteLinks("add", links, connections, id, canvasComponents);
+    let devicesArray = await addOrDeleteNodes("add", devices, id, canvasComponents);
 
-    devices = await getNodesFromProject(id);
-    links = await getLinksFromProject(id);
+    let linksArray = await addOrDeleteLinks("add", links, connections, id, devicesArray);
+    console.log(linksArray);
+    if (linksArray?.length == 0){
+      linksArray = await getLinksFromProject(id);
+    }
 
-    addOrDeleteLinks("delete", links, connections, id, canvasComponents);
-    addOrDeleteNodes("delete", devices, id, canvasComponents);
+    await addOrDeleteLinks("delete", links, linksArray, id, devicesArray);
+    await addOrDeleteNodes("delete", devices, id, devicesArray);
 
-    updatePosition(id, canvasComponents);
+    await updatePosition(id, canvasComponents);
 
-    return res.status(200).json({ message: "Project updated" });
+    return res.status(200).json({ devicesArray, linksArray });
   } catch (error) {
     console.log("update error" + error);
     return res.status(400).send("eror in updating");
   }
 }
 
-async function getNodesFromProject(id: string): Promise<Component[] | null> {
+async function getNodesFromProject(id: string): Promise<Device[] | null> {
   const tamplates: Dictionary<string> = {
     "f5f30ee0-8e87-4cbf-8682-17e5aae51685": "c7200",
     "1966b864-93e7-32d5-965f-001384eec461": "3600",
@@ -46,7 +47,7 @@ async function getNodesFromProject(id: string): Promise<Component[] | null> {
   };
   try {
     const { data } = await axios.get(`${GNS3_API}/${id}/nodes`);
-    const tamplateIds: Component[] = data.map((node: any) => ({
+    const tamplateIds: Device[] = data.map((node: any) => ({
       node_id: node.node_id,
       name: node.name,
       modelType: tamplates[node.template_id],
@@ -87,100 +88,107 @@ async function getLinksFromProject(id: string) {
 async function addOrDeleteLinks(
   action: string,
   links: Link[] | null,
-  updatedLinks: Link[],
+  updatedLinks: Link[] | null,
   id: string,
-  canvasComponents: Device[]
+  canvasComponents: Device[] | null
 ) {
   try {
     switch (action) {
       case "delete":
-        links?.forEach(async (link) => {
-          const exists = updatedLinks?.some(
-            (con) =>
-              link.from.node_id === con.from.node_id &&
-              link.to.node_id === con.to.node_id
-          );
-          if (!exists) {
-            const uplodedLink = await axios.delete(
-              `${GNS3_API}/${id}/links/${link.link_id}`
+        const actionsLinkAdd = links!.map(async (link) => {
+          if (link.from.node_id && link.to.node_id) {
+            const exists = updatedLinks?.some(
+              (con) => link.from.node_id === con.from.node_id && link.to.node_id === con.to.node_id
             );
+            if (!exists) {
+              await axios.delete(`${GNS3_API}/${id}/links/${link.link_id}`);
+            }
           }
         });
-        break;
-      case "add":
-        updatedLinks?.forEach(async (con) => {
-          console.log(con.from.node_id);
-          const exists = links?.some(
-            (link) =>
-              link.from.node_id === con.from.node_id &&
-              link.to.node_id === con.to.node_id
-          );
-          if (!exists) {
-            const uplodedLink = await axios.post(`${GNS3_API}/${id}/links`, {
-              nodes: [
-                {
-                  node_id: canvasComponents[con.from.index!].node_id,
-                  adapter_number: con.from.adapter_number,
-                  port_number: con.from.port_number,
-                },
-                {
-                  node_id: canvasComponents[con.to.index!].node_id,
-                  adapter_number: con.to.adapter_number,
-                  port_number: con.to.port_number,
-                },
-              ], 
-            });
+        await Promise.all(actionsLinkAdd);
+        return null;
+      case "add":  
+        let newLinks: Link[] = [];
+        const actionsLinks = updatedLinks!.map(async (con) => {
+          if (con.to.node_id && con.from.node_id) {
+            const exists = links?.some(
+              (link) => link.from.node_id === con.from.node_id && link.to.node_id === con.to.node_id
+            );
+
+            if (!exists) {
+              const { data } = await axios.post(`${GNS3_API}/${id}/links`, {
+                nodes: [
+                  {
+                    node_id: canvasComponents![con.from.index!].node_id!,
+                    adapter_number: con.from.adapter_number,
+                    port_number: con.from.port_number,
+                  },
+                  {
+                    node_id: canvasComponents![con.to.index!].node_id!,
+                    adapter_number: con.to.adapter_number,
+                    port_number: con.to.port_number,
+                  },
+                ],
+              });
+              newLinks.push({ link_id: data.link_id, from: data.nodes[0], to: data.nodes[1] });
+            }
+            newLinks.push(con);
           }
         });
-        break;
+        await Promise.all(actionsLinks);
+        console.log(newLinks);
+        return newLinks;
+      default:
+        return [];
     }
   } catch (error) {
-    console.log("update error main" + error);
-    throw new Error("error in update links");
+    console.log("update error links: " + error);
+    return [];
   }
 }
 
-async function addOrDeleteNodes (
+async function addOrDeleteNodes(
   action: string,
-  devices: Component[] | null,
+  devices: Device[] | null,
   id: string,
-  canvasComponents: Device[]
+  canvasComponents: Device[] | null
 ) {
   try {
     switch (action) {
       case "add":
-        let result : Device[] = [];
-        canvasComponents.forEach(async (device) => {
-          const exists = devices!.some(
-            (comp) => comp.node_id === device.node_id
-          );
+        let result: Device[] = [];
+        const actions = canvasComponents!.map(async (device) => {
+          const exists = devices!.some((comp) => comp.node_id === device.node_id);
           if (!exists) {
-            const uplodedDevice: Device[] | null = await createNode(
-              [device],
-              id
-            );
-            device.node_id = uplodedDevice![0].node_id;
+            const uplodedDevice: Device[] | null = await createNode([device], id);
+            result.push(uplodedDevice![0]);
+          } else {
             result.push(device);
           }
         });
+
+        await Promise.all(actions);
         return result;
 
       case "delete":
-        devices!.forEach(async (comp) => {
-          const deleteExist = canvasComponents.some(
-            (device) => comp.node_id === device.node_id
-          );
+        //console.log(canvasComponents);
+        //console.log(devices)
+        const actionsDelete = devices!.map(async (comp) => {
+          const deleteExist = canvasComponents!.some((device) => comp.node_id === device.node_id);
+          //console.log(deleteExist);
           if (!deleteExist) {
-            const todelete = await axios.delete(
-              `${GNS3_API}/${id}/nodes/${comp.node_id}`
-            );
+            const todelete = await axios.delete(`${GNS3_API}/${id}/nodes/${comp.node_id}`);
           }
         });
-        break;
+        await Promise.all(actionsDelete);
+        //console.log("finish");
+        return null;
+      default:
+        return null;
     }
   } catch (error) {
     console.log("error in uploding nodes " + error);
-    throw new Error("error in update nodes");
+    return null;
   }
 }
 

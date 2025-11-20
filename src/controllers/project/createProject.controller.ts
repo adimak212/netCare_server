@@ -16,7 +16,7 @@ export const createProject = async (req: Request, res: Response) => {
     const response = await createGNS3Project(ProjectName);
     const project_id = response.project_id;
     var createNodeResult = await createNode(canvasComponents, project_id);
-    //console.log(createNodeResult);
+    console.log(createNodeResult);
     const linksResult = await createLinks(connections, project_id  , createNodeResult);
     return res.status(200).json({ message: "Project created successfully" });
   } catch (error) {
@@ -75,7 +75,7 @@ export async function createNode(
 
     for (const component of canvasComponents) {
       let payload: any;
-      switch (component.deviceType) {
+      switch (component.node_type) {
         case "dynamips": {
           payload = {
             name: "router1",
@@ -152,7 +152,6 @@ export async function createNode(
       );
       results.push(response.data);
     }
-    //console.log(results);
     return results;
   } catch (error: any) {
     console.error(

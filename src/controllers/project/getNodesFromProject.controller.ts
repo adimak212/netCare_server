@@ -13,7 +13,7 @@ const tamplates: Dictionary<string> = {
   "39e257dc-8412-3174-b6b3-0ee3ed6a43e9": "Cloud",
 };
 
-export async function getNodesFromProject(req: Request, res: Response){
+export async function getNodesFromProject(req: Request, res: Response) {
   const id: string = req.query.id as string;
 
   const { data } = await axios.get(`${GNS3_API}/${id}/nodes`);
@@ -21,12 +21,12 @@ export async function getNodesFromProject(req: Request, res: Response){
   try {
     const tamplateIds: Component[] = data.map((node: any) => ({
       node_id: node.node_id,
-      id : node.node_id,
+      id: node.node_id,
       name: node.name,
       modelType: tamplates[node.template_id],
       x: node.x,
       y: node.y,
-      deviceType: node.node_type,
+      node_type: node.node_type,
       ports: [],
     }));
     await Promise.all(
@@ -38,7 +38,7 @@ export async function getNodesFromProject(req: Request, res: Response){
         //console.log(res.data.ports);
       })
     );
-    
+
     return res.status(200).json(tamplateIds);
   } catch (error) {
     console.log("get nodes error" + error);
