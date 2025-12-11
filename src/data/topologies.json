@@ -1,0 +1,47 @@
+[
+    {
+        "type": "fat_tree",
+        "name": "Fat Tree",
+        "base_capacity": 25000,
+        "dynamic_factor": 150,
+        "scalability": 0.90,
+        "redundancy": 0.80,
+        "cost": 0.50
+    },
+    {
+        "type": "mesh",
+        "name": "Mesh",
+        "base_capacity": 20000,
+        "dynamic_factor": 130,
+        "scalability": 0.70,
+        "redundancy": 0.90,
+        "cost": 0.70
+    },
+    {
+        "type": "fnn",
+        "name": "Flat Neighborhood Network",
+        "base_capacity": 15000,
+        "dynamic_factor": 80,
+        "scalability": 0.50,
+        "redundancy": 0.30,
+        "cost": 0.30
+    },
+    {
+        "type": "hybrid",
+        "name": "Hybrid",
+        "base_capacity": 22000,
+        "dynamic_factor": 120,
+        "scalability": 0.70,
+        "redundancy": 0.60,
+        "cost": 0.40
+    },
+    {
+        "type": "sdn",
+        "name": "Software Defined Network",
+        "base_capacity": 30000,
+        "dynamic_factor": 180,
+        "scalability": 0.85,
+        "redundancy": 0.80,
+        "cost": 0.40
+    }
+]

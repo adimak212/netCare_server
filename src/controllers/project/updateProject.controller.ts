@@ -198,6 +198,7 @@ async function updatePosition(id: string, canvasComponents: Device[]) {
       await axios.put(`${GNS3_API}/${id}/nodes/${device.node_id}`, {
         x: Math.round(device.x!),
         y: Math.round(device.y!),
+        name : device.name
       });
     }
   } catch (error) {

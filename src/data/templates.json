@@ -1,0 +1,81 @@
+{
+    "f5f30ee0-8e87-4cbf-8682-17e5aae51685": {
+        "id": "f5f30ee0-8e87-4cbf-8682-17e5aae51685",
+        "name": "c7200",
+        "type": "dynamips",
+        "bandwidth": 408,
+        "connections": 8,
+        "processing": 0.7,
+        "weight": 0
+    },
+
+    "39e257dc-8412-3174-b6b3-0ee3ed6a43e9": {
+        "id": "39e257dc-8412-3174-b6b3-0ee3ed6a43e9",
+        "name": "Cloud",
+        "type": "cloud",
+        "bandwidth": 1000,
+        "connections": 2,
+        "processing": 0.2,
+        "weight": 0
+    },
+
+    "df8f4ea9-33b7-3e96-86a2-c39bc9bb649c": {
+        "id": "df8f4ea9-33b7-3e96-86a2-c39bc9bb649c",
+        "name": "NAT",
+        "type": "nat",
+        "bandwidth": 10,
+        "connections": 1,
+        "processing": 0.2,
+        "weight": 0
+    },
+
+    "19021f99-e36f-394d-b4a1-8aaa902ab9cc": {
+        "id": "19021f99-e36f-394d-b4a1-8aaa902ab9cc",
+        "name": "VPCS",
+        "type": "vpcs",
+        "bandwidth": 10,
+        "connections": 1,
+        "processing": 0.1,
+        "weight": 0
+    },
+
+    "1966b864-93e7-32d5-965f-001384eec461": {
+        "id": "1966b864-93e7-32d5-965f-001384eec461",
+        "name": "Ethernet switch",
+        "type": "ethernet_switch",
+        "bandwidth": 800,
+        "connections": 8,
+        "processing": 0.3,
+        "weight": 0
+    },
+
+    "b4503ea9-d6b6-3695-9fe4-1db3b39290b0": {
+        "id": "b4503ea9-d6b6-3695-9fe4-1db3b39290b0",
+        "name": "Ethernet hub",
+        "type": "ethernet_hub",
+        "bandwidth": 10,
+        "connections": 1,
+        "processing": 0.2,
+        "weight": 0
+    },
+
+    "dd0f6f3a-ba58-3249-81cb-a1dd88407a47": {
+        "id": "dd0f6f3a-ba58-3249-81cb-a1dd88407a47",
+        "name": "Frame Relay switch",
+        "type": "frame_relay_switch",
+        "bandwidth": 10,
+        "connections": 1,
+        "processing": 0.2,
+        "weight": 0
+    },
+
+    "aaa764e2-b383-300f-8a0e-3493bbfdb7d2": {
+        "id": "aaa764e2-b383-300f-8a0e-3493bbfdb7d2",
+        "name": "ATM switch",
+        "type": "atm_switch",
+        "bandwidth": 10,
+        "connections": 1,
+        "processing": 0.2,
+        "weight": 0
+    }
+}
