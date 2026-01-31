@@ -12,12 +12,12 @@ export const createProject = async (req: Request, res: Response) => {
       ProjectName: string;
       connections: Link[];
     };
-    //console.log(connections);
+    console.log("Links" + connections.values);
     const response = await createGNS3Project(ProjectName);
     const project_id = response.project_id;
     var createNodeResult = await createNode(canvasComponents, project_id);
-    console.log(createNodeResult);
-    const linksResult = await createLinks(connections, project_id  , createNodeResult);
+    console.log("Nodes: " + createNodeResult);
+    const linksResult = await createLinks(connections, project_id, createNodeResult);
     return res.status(200).json({ message: "Project created successfully" });
   } catch (error) {
     console.error("Error in createProject controller:", error);
@@ -25,19 +25,18 @@ export const createProject = async (req: Request, res: Response) => {
   }
 };
 
-async function createLinks(links: Link[], projectId: string , createNodeResult : Device[] | null) {
+async function createLinks(links: Link[], projectId: string, createNodeResult: Device[] | null) {
   for (const link of links) {
     try {
-      //console.log("Creating link:", link);
       await axios.post(`${GNS3_API}/${projectId}/links`, {
         nodes: [
           {
-            node_id: createNodeResult![link.from.index!].node_id,
+            node_id: createNodeResult![Number(link.from.index!)].node_id,
             adapter_number: link.from.adapter_number,
             port_number: link.from.port_number,
           },
           {
-            node_id: createNodeResult![link.to.index!].node_id,
+            node_id: createNodeResult![Number(link.to.index!)].node_id,
             adapter_number: link.to.adapter_number,
             port_number: link.to.port_number,
           },
@@ -58,22 +57,18 @@ async function createGNS3Project(name: string) {
     //console.log("Project created: ", response.data);
     return response.data;
   } catch (error: any) {
-    console.error(
-      "Error creating project:",
-      error.response?.data || error.message
-    );
+    console.error("Error creating project:", error.response?.data || error.message);
     throw error;
   }
 }
 
-export async function createNode(
-  canvasComponents: Device[],
-  project_id: string
-) {
+export async function createNode(canvasComponents: Device[], project_id: string) {
   try {
     const results: Device[] = [];
 
     for (const component of canvasComponents) {
+      const x = Number.isFinite(component.x as number) ? Math.round(component.x as number) : 0;
+      const y = Number.isFinite(component.y as number) ? Math.round(component.y as number) : 0;
       let payload: any;
       switch (component.node_type) {
         case "dynamips": {
@@ -82,8 +77,8 @@ export async function createNode(
             node_type: "dynamips",
             template_id: "f5f30ee0-8e87-4cbf-8682-17e5aae51685",
             compute_id: "local",
-            x: Math.round(component.x!),
-            y: Math.round(component.y!),
+            x: x,
+            y: y,
             symbol: ":/symbols/router.svg",
             properties: {
               platform: "c7200",
@@ -105,8 +100,8 @@ export async function createNode(
             node_type: "ethernet_switch",
             template_id: "1966b864-93e7-32d5-965f-001384eec461",
             compute_id: "local",
-            x: Math.round(component.x!),
-            y: Math.round(component.y!),
+            x: x,
+            y: y,
             symbol: ":/symbols/ethernet_switch.svg",
             properties: { ports: 8 },
           };
@@ -119,8 +114,8 @@ export async function createNode(
             node_type: "vpcs",
             template_id: "19021f99-e36f-394d-b4a1-8aaa902ab9cc",
             compute_id: "local",
-            x: Math.round(component.x!),
-            y: Math.round(component.y!),
+            x: x,
+            y: y,
             symbol: ":/symbols/vpcs_guest.svg",
             properties: { base_script_file: "vpcs_base_config.txt" },
           };
@@ -133,8 +128,8 @@ export async function createNode(
             node_type: "cloud",
             template_id: "39e257dc-8412-3174-b6b3-0ee3ed6a43e9",
             compute_id: "local",
-            x: Math.round(component.x!),
-            y: Math.round(component.y!),
+            x: x,
+            y: y,
             symbol: ":/symbols/cloud.svg",
             properties: {},
           };
@@ -145,19 +140,14 @@ export async function createNode(
           continue;
         }
       }
-      const response = await axios.post(
-        `${GNS3_API}/${project_id}/nodes`,
-        payload,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await axios.post(`${GNS3_API}/${project_id}/nodes`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
       results.push(response.data);
     }
     return results;
   } catch (error: any) {
-    console.error(
-      "Error creating nodes:",
-      error.response?.data || error.message
-    );
+    console.error("Error creating nodes:", error.response?.data || error.message);
     return null;
   }
 }
