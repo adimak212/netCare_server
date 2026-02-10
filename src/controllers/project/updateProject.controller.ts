@@ -171,17 +171,13 @@ async function addOrDeleteNodes(
         return result;
 
       case "delete":
-        //console.log(canvasComponents);
-        //console.log(devices)
         const actionsDelete = devices!.map(async (comp) => {
           const deleteExist = canvasComponents!.some((device) => comp.node_id === device.node_id);
-          //console.log(deleteExist);
           if (!deleteExist) {
             const todelete = await axios.delete(`${GNS3_API}/${id}/nodes/${comp.node_id}`);
           }
         });
         await Promise.all(actionsDelete);
-        //console.log("finish");
         return null;
       default:
         return null;

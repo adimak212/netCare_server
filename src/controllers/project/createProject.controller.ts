@@ -12,13 +12,19 @@ export const createProject = async (req: Request, res: Response) => {
       ProjectName: string;
       connections: Link[];
     };
-    console.log("Links" + connections.values);
+    //console.log("Links" + connections.values);
     const response = await createGNS3Project(ProjectName);
     const project_id = response.project_id;
     var createNodeResult = await createNode(canvasComponents, project_id);
     console.log("Nodes: " + createNodeResult);
     const linksResult = await createLinks(connections, project_id, createNodeResult);
-    return res.status(200).json({ message: "Project created successfully" });
+    console.log(linksResult);
+    return res.status(200).json({
+      message: "Project created successfully",
+      project_id: project_id,
+      nodes: createNodeResult,
+      links: linksResult,
+    });
   } catch (error) {
     console.error("Error in createProject controller:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -26,26 +32,28 @@ export const createProject = async (req: Request, res: Response) => {
 };
 
 async function createLinks(links: Link[], projectId: string, createNodeResult: Device[] | null) {
+  let result = [];
   for (const link of links) {
     try {
-      await axios.post(`${GNS3_API}/${projectId}/links`, {
-        nodes: [
-          {
-            node_id: createNodeResult![Number(link.from.index!)].node_id,
-            adapter_number: link.from.adapter_number,
-            port_number: link.from.port_number,
-          },
-          {
-            node_id: createNodeResult![Number(link.to.index!)].node_id,
-            adapter_number: link.to.adapter_number,
-            port_number: link.to.port_number,
-          },
-        ],
-      });
+      const node = [
+        {
+          node_id: createNodeResult![Number(link.from.index!)].node_id,
+          adapter_number: link.from.adapter_number,
+          port_number: link.from.port_number,
+        },
+        {
+          node_id: createNodeResult![Number(link.to.index!)].node_id,
+          adapter_number: link.to.adapter_number,
+          port_number: link.to.port_number,
+        },
+      ];
+      await axios.post(`${GNS3_API}/${projectId}/links`, {nodes: node});
+      result.push({from: node[0] , to: node[1]});
     } catch (error) {
       console.error("Error creating link:", error);
     }
   }
+  return result;
 }
 
 async function createGNS3Project(name: string) {
@@ -73,7 +81,7 @@ export async function createNode(canvasComponents: Device[], project_id: string)
       switch (component.node_type) {
         case "dynamips": {
           payload = {
-            name: "router1",
+            name: component.name,
             node_type: "dynamips",
             template_id: "f5f30ee0-8e87-4cbf-8682-17e5aae51685",
             compute_id: "local",
@@ -96,7 +104,7 @@ export async function createNode(canvasComponents: Device[], project_id: string)
 
         case "ethernet_switch": {
           payload = {
-            name: "switch1",
+            name: component.name,
             node_type: "ethernet_switch",
             template_id: "1966b864-93e7-32d5-965f-001384eec461",
             compute_id: "local",
@@ -110,7 +118,7 @@ export async function createNode(canvasComponents: Device[], project_id: string)
 
         case "vpcs": {
           payload = {
-            name: "pc1",
+            name: component.name,
             node_type: "vpcs",
             template_id: "19021f99-e36f-394d-b4a1-8aaa902ab9cc",
             compute_id: "local",
@@ -124,7 +132,7 @@ export async function createNode(canvasComponents: Device[], project_id: string)
 
         case "cloud": {
           payload = {
-            name: "cloud1",
+            name: component.name,
             node_type: "cloud",
             template_id: "39e257dc-8412-3174-b6b3-0ee3ed6a43e9",
             compute_id: "local",

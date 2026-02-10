@@ -16,15 +16,14 @@ class Mesh:
         pcs = int(params.get("pcs", 0))
         hps = int(params.get("hosts_per_switch", 4))
 
-        access = max(1, ceil(pcs / hps))
-        backbone = max(1, ceil(access / 2))
-        core = max(1, ceil(backbone / 2))
+        edge = max(1, ceil(pcs / hps))
+        agg = max(1, ceil(edge * 0.8))
+        core = max(1, ceil(agg / 3))
 
-        total_switches = access + backbone
         return {
             "pcs": pcs,
-            "edge_switches": access,
-            "agg_switches": backbone,
+            "edge_switches": edge,
+            "agg_switches": agg,
             "core_routers": core,
         }
 

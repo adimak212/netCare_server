@@ -3,7 +3,7 @@ from .templates import load_default_templates, load_default_bin_capacities
 from .BinFactory import pack_per_bin_type
 
 
-def physical_cost_for_topology(topo, params, templates, capacities) -> float:
+def physical_cost_for_topology(topo, params, templates, capacities):
     normalized = topo.normalize(params)
     items = topo.build_items(normalized, templates)
     bins = pack_per_bin_type(items, capacities, {"u": 0.6, "watt": 0.4, "cost": 0.0, "ports": 0.0})
@@ -35,7 +35,7 @@ def rank_topologies(
     temp: List[Dict[str, Any]] = []
     for topo in topology_classes.values():
         pcost , normalized = physical_cost_for_topology(topo, params, templates, capacities)
-        temp.append({"topo": topo, "pcost": pcost})
+        temp.append({"topo": topo, "pcost": pcost , "normalized": normalized})
 
     min_cost = min(x["pcost"] for x in temp) if temp else 0.0
     max_cost = max(x["pcost"] for x in temp) if temp else 1.0
@@ -45,6 +45,7 @@ def rank_topologies(
     for x in temp:
         topo = x["topo"]
         pcost = x["pcost"]
+        normalized = x["normalized"]
 
         dynamic_cost = 0.5 if den == 0 else (pcost - min_cost) / den
 
@@ -58,7 +59,7 @@ def rank_topologies(
             "key": topo.key,
             "name": topo.name,
             "score": round(score, 4),
-            "debug": {"normalized": normalized},
+            "normalized": normalized,
             "metrics": {
                 "scalability": float(topo.Scalability),
                 "redundancy": float(topo.Redundancy),
