@@ -7,6 +7,7 @@ import { openProject } from "../controllers/project/openProject.controller"
 import {closeProject} from "../controllers/project/closeProject.controller"
 import { getLinksFromProject } from "../controllers/project/getLinksFromProject.controller";
 import { updateProject } from "../controllers/project/updateProject.controller";
+import { startProject } from "../controllers/project/startProject.controller";
 const projectRouter = Router();
 
 projectRouter.post("/createProject", createProject);
@@ -17,5 +18,6 @@ projectRouter.post("/openProject" , openProject);
 projectRouter.post("/closeProject" , closeProject);
 projectRouter.get("/getProjectLinks" , getLinksFromProject);
 projectRouter.post("/updateProject" , updateProject);
+projectRouter.post("/startProject" , startProject);
 
 export default projectRouter;

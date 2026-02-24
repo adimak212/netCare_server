@@ -28,6 +28,7 @@ export async function getNodesFromProject(req: Request, res: Response) {
       y: node.y,
       node_type: node.node_type,
       ports: [],
+      status: node.status
     }));
     await Promise.all(
       tamplateIds.map(async (element) => {
@@ -35,10 +36,10 @@ export async function getNodesFromProject(req: Request, res: Response) {
           `http://localhost:3080/v2/projects/${id}/nodes/${element.node_id}`
         );
         element.ports = res.data.ports;
-        //console.log(res.data.ports);
       })
     );
 
+    console.log(tamplateIds)
     return res.status(200).json(tamplateIds);
   } catch (error) {
     console.log("get nodes error" + error);

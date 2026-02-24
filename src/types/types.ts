@@ -12,6 +12,7 @@ export type Component = {
   y: number;
   deviceType: number;
   ports: [];
+  status: string;
 };
 
 export type LinkComp = {
