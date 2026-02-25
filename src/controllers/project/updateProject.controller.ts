@@ -6,7 +6,7 @@ import { Dictionary, Component } from "../../types/types";
 import { createNode } from "./createProject.controller";
 import { link } from "fs";
 
-const GNS3_API = "http://localhost:3080/v2/projects";
+const GNS3_API = "http://100.71.52.17:3080/v2/projects";
 
 export async function updateProject(req: Request, res: Response) {
   try {
@@ -22,7 +22,7 @@ export async function updateProject(req: Request, res: Response) {
 
     let linksArray = await addOrDeleteLinks("add", links, connections, id, devicesArray);
     console.log(linksArray);
-    if (linksArray?.length == 0){
+    if (linksArray?.length == 0) {
       linksArray = await getLinksFromProject(id);
     }
 
@@ -59,10 +59,10 @@ async function getNodesFromProject(id: string): Promise<Device[] | null> {
     await Promise.all(
       tamplateIds.map(async (element) => {
         const res = await axios.get(
-          `http://localhost:3080/v2/projects/${id}/nodes/${element.node_id}`
+          `http://localhost:3080/v2/projects/${id}/nodes/${element.node_id}`,
         );
         element.ports = res.data.ports;
-      })
+      }),
     );
     return tamplateIds;
   } catch (error) {
@@ -90,7 +90,7 @@ async function addOrDeleteLinks(
   links: Link[] | null,
   updatedLinks: Link[] | null,
   id: string,
-  canvasComponents: Device[] | null
+  canvasComponents: Device[] | null,
 ) {
   try {
     switch (action) {
@@ -98,7 +98,7 @@ async function addOrDeleteLinks(
         const actionsLinkAdd = links!.map(async (link) => {
           if (link.from.node_id && link.to.node_id) {
             const exists = updatedLinks?.some(
-              (con) => link.from.node_id === con.from.node_id && link.to.node_id === con.to.node_id
+              (con) => link.from.node_id === con.from.node_id && link.to.node_id === con.to.node_id,
             );
             if (!exists) {
               await axios.delete(`${GNS3_API}/${id}/links/${link.link_id}`);
@@ -107,12 +107,13 @@ async function addOrDeleteLinks(
         });
         await Promise.all(actionsLinkAdd);
         return null;
-      case "add":  
+      case "add":
         let newLinks: Link[] = [];
         const actionsLinks = updatedLinks!.map(async (con) => {
           if (con.to.node_id && con.from.node_id) {
             const exists = links?.some(
-              (link) => link.from.node_id === con.from.node_id && link.to.node_id === con.to.node_id
+              (link) =>
+                link.from.node_id === con.from.node_id && link.to.node_id === con.to.node_id,
             );
 
             if (!exists) {
@@ -151,7 +152,7 @@ async function addOrDeleteNodes(
   action: string,
   devices: Device[] | null,
   id: string,
-  canvasComponents: Device[] | null
+  canvasComponents: Device[] | null,
 ) {
   try {
     switch (action) {
@@ -194,7 +195,7 @@ async function updatePosition(id: string, canvasComponents: Device[]) {
       await axios.put(`${GNS3_API}/${id}/nodes/${device.node_id}`, {
         x: Math.round(device.x!),
         y: Math.round(device.y!),
-        name : device.name
+        name: device.name,
       });
     }
   } catch (error) {

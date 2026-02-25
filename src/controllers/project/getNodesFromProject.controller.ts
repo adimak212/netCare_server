@@ -4,7 +4,7 @@ import { futimesSync } from "fs";
 import { Dictionary, Component } from "../../types/types";
 import { Device } from "../../classes/Device";
 
-const GNS3_API = "http://localhost:3080/v2/projects";
+const GNS3_API = "http://100.71.52.17:3080/v2/projects";
 
 const tamplates: Dictionary<string> = {
   "f5f30ee0-8e87-4cbf-8682-17e5aae51685": "c7200",
@@ -28,18 +28,18 @@ export async function getNodesFromProject(req: Request, res: Response) {
       y: node.y,
       node_type: node.node_type,
       ports: [],
-      status: node.status
+      status: node.status,
     }));
     await Promise.all(
       tamplateIds.map(async (element) => {
         const res = await axios.get(
-          `http://localhost:3080/v2/projects/${id}/nodes/${element.node_id}`
+          `${GNS3_API}/${id}/nodes/${element.node_id}`,
         );
         element.ports = res.data.ports;
-      })
+      }),
     );
 
-    console.log(tamplateIds)
+    console.log(tamplateIds);
     return res.status(200).json(tamplateIds);
   } catch (error) {
     console.log("get nodes error" + error);

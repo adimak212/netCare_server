@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "../../types/types";
 import { Device } from "../../classes/Device";
 
-const GNS3_API = "http://localhost:3080/v2/projects";
+const GNS3_API = "http://100.71.52.17:3080/v2/projects";
 
 export const createProject = async (req: Request, res: Response) => {
   try {
@@ -47,8 +47,8 @@ async function createLinks(links: Link[], projectId: string, createNodeResult: D
           port_number: link.to.port_number,
         },
       ];
-      await axios.post(`${GNS3_API}/${projectId}/links`, {nodes: node});
-      result.push({from: node[0] , to: node[1]});
+      await axios.post(`${GNS3_API}/${projectId}/links`, { nodes: node });
+      result.push({ from: node[0], to: node[1] });
     } catch (error) {
       console.error("Error creating link:", error);
     }
@@ -83,7 +83,7 @@ export async function createNode(canvasComponents: Device[], project_id: string)
           payload = {
             name: component.name,
             node_type: "dynamips",
-            template_id: "f5f30ee0-8e87-4cbf-8682-17e5aae51685",
+            template_id: "533361ab-e9de-4326-a9ee-9d3770a4bbb1",
             compute_id: "local",
             x: x,
             y: y,
