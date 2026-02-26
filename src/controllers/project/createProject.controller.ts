@@ -12,13 +12,13 @@ export const createProject = async (req: Request, res: Response) => {
       ProjectName: string;
       connections: Link[];
     };
-    //console.log("Links" + connections.values);
+    ////("Links" + connections.values);
     const response = await createGNS3Project(ProjectName);
     const project_id = response.project_id;
     var createNodeResult = await createNode(canvasComponents, project_id);
-    console.log("Nodes: " + createNodeResult);
+    //("Nodes: " + createNodeResult);
     const linksResult = await createLinks(connections, project_id, createNodeResult);
-    console.log(linksResult);
+    //(linksResult);
     return res.status(200).json({
       message: "Project created successfully",
       project_id: project_id,
@@ -62,7 +62,7 @@ async function createGNS3Project(name: string) {
       name,
       auto_close: false,
     });
-    //console.log("Project created: ", response.data);
+    ////("Project created: ", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error creating project:", error.response?.data || error.message);

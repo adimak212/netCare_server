@@ -5,14 +5,14 @@ export const runAlgorithm = (req: Request, res: Response) => {
   const params = req.query;
 
   const python = spawn("python", ["-m", "src.algorithm.main", JSON.stringify(params)], {
-    cwd: process.cwd(), 
+    cwd: process.cwd(),
   });
 
   let dataString = "";
   let errorString = "";
 
   python.stdout.on("data", (data) => {
-    console.log("Python output:", data.toString());
+    //("Python output:", data.toString());
     dataString += data.toString();
   });
   python.stderr.on("data", (data) => {
@@ -21,7 +21,7 @@ export const runAlgorithm = (req: Request, res: Response) => {
   });
 
   python.on("close", (code) => {
-    console.log(`Python process exited with code ${code}`);
+    //(`Python process exited with code ${code}`);
 
     if (code !== 0) {
       return res.status(500).json({
@@ -32,7 +32,7 @@ export const runAlgorithm = (req: Request, res: Response) => {
     }
 
     const raw = dataString.trim();
-    //console.log("RAW FROM PYTHON:", raw);
+    ////("RAW FROM PYTHON:", raw);
 
     if (!raw) {
       return res.status(500).json({
@@ -43,14 +43,14 @@ export const runAlgorithm = (req: Request, res: Response) => {
 
     try {
       const parsed = JSON.parse(raw);
-      //console.log(raw);
+      ////(raw);
       if (params["build_or_bestfit"] === "bestfit") {
         const ranksArray = Object.entries(parsed.ranks).map(([name, score]) => ({
           name,
           score,
         }));
         parsed.ranks = ranksArray;
-        //console.log(parsed.ranks);
+        ////(parsed.ranks);
       }
       return res.status(200).json(parsed);
     } catch (e: any) {

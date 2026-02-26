@@ -5,13 +5,13 @@ const GNS3_API = "http://100.71.52.17:3080/v2/projects";
 
 export const deleteProject = async (req: Request, res: Response) => {
   const id = req.query.id as string;
-  //console.log(id);
+  ////(id);
   try {
     const response = await axios.delete(`${GNS3_API}/${id}`);
     res.status(200).send("project deleted");
   } catch (error: any) {
-    console.log("Error in deleting");
-    console.log(error.message);
+    console.log("Error in deleting" + error);
+    //(error.message);
     res.status(400).send("Error in delete");
   }
 };

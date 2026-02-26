@@ -11,6 +11,7 @@ class Device {
     short_name:string
   }[];
   name? : string;
+  console?: number;
 }
 
 class PC extends Device {

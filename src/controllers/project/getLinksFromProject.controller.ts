@@ -14,7 +14,7 @@ export const getLinksFromProject = async (req: Request, res: Response) => {
       from: link.nodes[0],
       to: link.nodes[1],
     }));
-    //console.log(links)
+    ////(links)
     return res.status(200).json(links);
   } catch (error) {
     console.log(error);

@@ -7,7 +7,7 @@ export const startProject = async (req: Request, res: Response) => {
   try {
     const { id } = req.body.params;
     const response = await axios.post(`${GNS3_API}/${id}/nodes/start`);
-    console.log(response);
+    //(response);
     res.status(200).json({ message: "project start successfully", data: id });
   } catch (error) {
     console.error("Error starting project:", error);

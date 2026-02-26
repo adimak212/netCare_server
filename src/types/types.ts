@@ -13,6 +13,7 @@ export type Component = {
   deviceType: number;
   ports: [];
   status: string;
+  console: number;
 };
 
 export type LinkComp = {

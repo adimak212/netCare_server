@@ -18,10 +18,10 @@ export async function updateProject(req: Request, res: Response) {
     let devices: Device[] | null = await getNodesFromProject(id);
     let links: Link[] | null = await getLinksFromProject(id);
 
-    let devicesArray = await addOrDeleteNodes("add", devices, id, canvasComponents);
-
+    let devicesArray: Device[] | null= await addOrDeleteNodes("add", devices, id, canvasComponents);
+    console.log(GNS3_API+"/"+id+"/nodes");
+    //console.log(devicesArray);
     let linksArray = await addOrDeleteLinks("add", links, connections, id, devicesArray);
-    console.log(linksArray);
     if (linksArray?.length == 0) {
       linksArray = await getLinksFromProject(id);
     }
@@ -29,7 +29,7 @@ export async function updateProject(req: Request, res: Response) {
     await addOrDeleteLinks("delete", links, linksArray, id, devicesArray);
     await addOrDeleteNodes("delete", devices, id, devicesArray);
 
-    await updatePosition(id, canvasComponents);
+    await updatePosition(id, devicesArray!);
 
     return res.status(200).json({ devicesArray, linksArray });
   } catch (error) {
@@ -59,14 +59,14 @@ async function getNodesFromProject(id: string): Promise<Device[] | null> {
     await Promise.all(
       tamplateIds.map(async (element) => {
         const res = await axios.get(
-          `http://localhost:3080/v2/projects/${id}/nodes/${element.node_id}`,
+          `${GNS3_API}/${id}/nodes/${element.node_id}`,
         );
         element.ports = res.data.ports;
       }),
     );
     return tamplateIds;
   } catch (error) {
-    console.log("get nodes error" + error);
+    console.log("get nodes error: " + error);
     return null;
   }
 }
@@ -110,6 +110,7 @@ async function addOrDeleteLinks(
       case "add":
         let newLinks: Link[] = [];
         const actionsLinks = updatedLinks!.map(async (con) => {
+          //console.log("from: " , con.from.node_id , "to: " , con.to.node_id);
           if (con.to.node_id && con.from.node_id) {
             const exists = links?.some(
               (link) =>
@@ -121,11 +122,13 @@ async function addOrDeleteLinks(
                 nodes: [
                   {
                     node_id: canvasComponents![con.from.index!].node_id!,
+                    //node_id: con.from.node_id,
                     adapter_number: con.from.adapter_number,
                     port_number: con.from.port_number,
                   },
                   {
                     node_id: canvasComponents![con.to.index!].node_id!,
+                    //node_id: con.to.node_id,
                     adapter_number: con.to.adapter_number,
                     port_number: con.to.port_number,
                   },
@@ -137,13 +140,13 @@ async function addOrDeleteLinks(
           }
         });
         await Promise.all(actionsLinks);
-        console.log(newLinks);
+        //(newLinks);
         return newLinks;
       default:
         return [];
     }
   } catch (error) {
-    console.log("update error links: " + error);
+    console.log("error update links: " + error);
     return [];
   }
 }
@@ -158,28 +161,30 @@ async function addOrDeleteNodes(
     switch (action) {
       case "add":
         let result: Device[] = [];
-        const actions = canvasComponents!.map(async (device) => {
-          const exists = devices!.some((comp) => comp.node_id === device.node_id);
-          if (!exists) {
-            const uplodedDevice: Device[] | null = await createNode([device], id);
-            result.push(uplodedDevice![0]);
-          } else {
-            result.push(device);
-          }
-        });
-
-        await Promise.all(actions);
+        if (devices != null) {
+          const actions = canvasComponents!.map(async (device) => {
+            const exists = devices!.some((comp) => comp.node_id === device.node_id);
+            if (!exists) {
+              const uplodedDevice: Device[] | null = await createNode([device], id);
+              result.push(uplodedDevice![0]);
+            } else {
+              result.push(device);
+            }
+          });
+          await Promise.all(actions);
+        }
         return result;
-
       case "delete":
-        const actionsDelete = devices!.map(async (comp) => {
-          const deleteExist = canvasComponents!.some((device) => comp.node_id === device.node_id);
-          if (!deleteExist) {
-            const todelete = await axios.delete(`${GNS3_API}/${id}/nodes/${comp.node_id}`);
-          }
-        });
-        await Promise.all(actionsDelete);
-        return null;
+        if (devices != null) {
+          const actionsDelete = devices!.map(async (comp) => {
+            const deleteExist = canvasComponents!.some((device) => comp.node_id === device.node_id);
+            if (!deleteExist) {
+              const todelete = await axios.delete(`${GNS3_API}/${id}/nodes/${comp.node_id}`);
+            }
+          });
+          await Promise.all(actionsDelete);
+          return null;
+        }
       default:
         return null;
     }
@@ -192,6 +197,7 @@ async function addOrDeleteNodes(
 async function updatePosition(id: string, canvasComponents: Device[]) {
   try {
     for (const device of canvasComponents) {
+      console.log(device.node_id);
       await axios.put(`${GNS3_API}/${id}/nodes/${device.node_id}`, {
         x: Math.round(device.x!),
         y: Math.round(device.y!),

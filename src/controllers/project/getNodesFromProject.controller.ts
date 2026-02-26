@@ -29,17 +29,16 @@ export async function getNodesFromProject(req: Request, res: Response) {
       node_type: node.node_type,
       ports: [],
       status: node.status,
+      console: node.console,
     }));
     await Promise.all(
       tamplateIds.map(async (element) => {
-        const res = await axios.get(
-          `${GNS3_API}/${id}/nodes/${element.node_id}`,
-        );
+        const res = await axios.get(`${GNS3_API}/${id}/nodes/${element.node_id}`);
         element.ports = res.data.ports;
       }),
     );
 
-    console.log(tamplateIds);
+    //(tamplateIds);
     return res.status(200).json(tamplateIds);
   } catch (error) {
     console.log("get nodes error" + error);
