@@ -6,7 +6,7 @@ import { Dictionary, Component } from "../../types/types";
 import { createNode } from "./createProject.controller";
 import { link } from "fs";
 
-const GNS3_API = "http://100.71.52.17:3080/v2/projects";
+const GNS3_API = "http://adi-makdasi.tail2be12f.ts.net:3080/v2/projects";
 
 export async function updateProject(req: Request, res: Response) {
   try {
@@ -18,8 +18,13 @@ export async function updateProject(req: Request, res: Response) {
     let devices: Device[] | null = await getNodesFromProject(id);
     let links: Link[] | null = await getLinksFromProject(id);
 
-    let devicesArray: Device[] | null= await addOrDeleteNodes("add", devices, id, canvasComponents);
-    console.log(GNS3_API+"/"+id+"/nodes");
+    let devicesArray: Device[] | null = await addOrDeleteNodes(
+      "add",
+      devices,
+      id,
+      canvasComponents,
+    );
+    console.log(GNS3_API + "/" + id + "/nodes");
     //console.log(devicesArray);
     let linksArray = await addOrDeleteLinks("add", links, connections, id, devicesArray);
     if (linksArray?.length == 0) {
@@ -58,9 +63,7 @@ async function getNodesFromProject(id: string): Promise<Device[] | null> {
     }));
     await Promise.all(
       tamplateIds.map(async (element) => {
-        const res = await axios.get(
-          `${GNS3_API}/${id}/nodes/${element.node_id}`,
-        );
+        const res = await axios.get(`${GNS3_API}/${id}/nodes/${element.node_id}`);
         element.ports = res.data.ports;
       }),
     );

@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "../../types/types";
 import { Device } from "../../classes/Device";
 
-const GNS3_API = "http://100.71.52.17:3080/v2/projects";
+const GNS3_API = "http://adi-makdasi.tail2be12f.ts.net:3080/v2/projects";
 
 export const createProject = async (req: Request, res: Response) => {
   try {

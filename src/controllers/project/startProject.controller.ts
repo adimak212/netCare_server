@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import axios from "axios";
 
-const GNS3_API = "http://100.71.52.17:3080/v2/projects";
+const GNS3_API = "http://adi-makdasi.tail2be12f.ts.net:3080/v2/projects";
 
 export const startProject = async (req: Request, res: Response) => {
   try {

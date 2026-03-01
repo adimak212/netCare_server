@@ -4,7 +4,7 @@ import { futimesSync } from "fs";
 import { Dictionary, Component } from "../../types/types";
 import { Device } from "../../classes/Device";
 
-const GNS3_API = "http://100.71.52.17:3080/v2/projects";
+const GNS3_API = "http://adi-makdasi.tail2be12f.ts.net:3080/v2/projects";
 
 const tamplates: Dictionary<string> = {
   "f5f30ee0-8e87-4cbf-8682-17e5aae51685": "c7200",
