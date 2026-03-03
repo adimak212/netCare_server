@@ -17,7 +17,7 @@ export const createProject = async (req: Request, res: Response) => {
     const project_id = response.project_id;
     var createNodeResult = await createNode(canvasComponents, project_id);
     //("Nodes: " + createNodeResult);
-    const linksResult = await createLinks(connections, project_id, createNodeResult);
+    const linksResult = await createLinks(connections, project_id, createNodeResult!);
     //(linksResult);
     return res.status(200).json({
       message: "Project created successfully",
@@ -25,9 +25,9 @@ export const createProject = async (req: Request, res: Response) => {
       nodes: createNodeResult,
       links: linksResult,
     });
-  } catch (error) {
-    console.error("Error in createProject controller:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+  } catch (error: any) {
+    //console.error(error);
+    res.status(500).json({ error: error });
   }
 };
 
@@ -65,9 +65,33 @@ async function createGNS3Project(name: string) {
     ////("Project created: ", response.data);
     return response.data;
   } catch (error: any) {
-    console.error("Error creating project:", error.response?.data || error.message);
-    throw error;
+    console.error("Error creating project:", error.status);
+    const errorMassege = getFriendlyError(error);
+    throw errorMassege;
   }
+}
+function getFriendlyError(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const status = err.response?.status;
+
+    if (status === 400) {
+      return "Invalid project details. Please check your input.";
+    }
+
+    if (status === 401) {
+      return "You are not authorized.";
+    }
+    if (status === 409) {
+      return "Project name already exist , Pleast pick another name";
+    }
+    if (status === 500) {
+      return "Server error. Please try again later.";
+    }
+
+    return "Request failed. Please try again.";
+  }
+
+  return "Something went wrong.";
 }
 
 export async function createNode(canvasComponents: Device[], project_id: string) {
@@ -154,8 +178,5 @@ export async function createNode(canvasComponents: Device[], project_id: string)
       results.push(response.data);
     }
     return results;
-  } catch (error: any) {
-    console.error("Error creating nodes:", error.response?.data || error.message);
-    return null;
-  }
+  } catch (error: any) {}
 }

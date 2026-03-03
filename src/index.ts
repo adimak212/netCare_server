@@ -87,6 +87,5 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
 });
 
 server.listen(PORT, () => {
-  //(`✅ Server running at http://localhost:${PORT}`);
-  //(`✅ WS at ws://localhost:${PORT}/ws/console`);
+  
 });
