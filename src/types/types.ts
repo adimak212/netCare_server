@@ -14,6 +14,7 @@ export type Component = {
   ports: [];
   status: string;
   console: number;
+  slot1: string;
 };
 
 export type LinkComp = {
