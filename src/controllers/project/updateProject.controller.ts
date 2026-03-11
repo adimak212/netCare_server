@@ -168,7 +168,7 @@ async function addOrDeleteNodes(
           const actions = canvasComponents!.map(async (device) => {
             const exists = devices!.some((comp) => comp.node_id === device.node_id);
             if (!exists) {
-              const uplodedDevice: Device[] | null = await createNode([device], id);
+              const uplodedDevice: Device[] | undefined = await createNode([device], id);
               result.push(uplodedDevice![0]);
             } else {
               result.push(device);

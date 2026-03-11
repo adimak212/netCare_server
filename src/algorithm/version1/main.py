@@ -4,7 +4,7 @@ from uuid import uuid4
 from typing import Dict, Any, List, Literal, Tuple
 from .compare import rank_topologies
 from .templates import load_default_templates, load_default_bin_capacities
-from .topologies import TOPOLOGIES
+from ..topologies import TOPOLOGIES
 from .BinFactory import pack_per_bin_type
 from .serialization import bins_to_dict
 from .nodes import build_gns3_nodes, position_nodes

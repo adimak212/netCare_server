@@ -87,5 +87,5 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
 });
 
 server.listen(PORT, () => {
-  
+  console.log(`Server listening on http://localhost:${PORT}`);
 });
