@@ -4,7 +4,7 @@ class Device {
   icon?: string;
   x?: number;
   y?: number;
-  node_type?: "ethernet_switch" | "dynamips" | "vpcs" | "cloud";
+  node_type?: "ethernet_switch" | "dynamips" | "vpcs" | "cloud" | "cicso_switch";
   ports?: {
     link_type: string,
     port_number: number,

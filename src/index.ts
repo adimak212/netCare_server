@@ -6,11 +6,15 @@ import type { IncomingMessage } from "http";
 import net from "net";
 import indexRouter from "./routes/index_router";
 import type { RawData } from "ws";
+import initDb  from "./models/db.model"
+import dotenv from "dotenv";
+
 
 const app = express();
+app.use(express.json());
 const PORT = 3000;
 
-app.use(express.json());
+dotenv.config();
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -18,7 +22,7 @@ app.use(
     credentials: true,
   }),
 );
-
+initDb();
 app.use("/v1", indexRouter);
 
 const server = http.createServer(app);

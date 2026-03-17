@@ -45,7 +45,7 @@ def build_links(
         elif nt == "dynamips":
             pool = [{"adapter_number": a, "port_number": p, "port": l} for a, p, l in ROUTER_PORTS]
         else:
-            pool = [{"adapter_number": 0, "port_number": i, "port": f"e{i}"} for i in range(switch_ports)]
+            pool = [{"adapter_number": 1, "port_number": i, "port": f"e{i}"} for i in range(switch_ports)]
         port_pool[node_name] = pool
         port_idx[node_name] = 0
         used_ports[node_name] = set()

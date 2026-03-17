@@ -139,11 +139,11 @@ def main():
     if choice == "createNodes":
         node_type_by_type = {
             "pcs": "vpcs",
-            "edge_switches": "ethernet_switch",
-            "agg_switches": "ethernet_switch",
+            "edge_switches": "cicso_switch",
+            "agg_switches": "cicso_switch",
             "core_routers": "dynamips",
-            "zone_switches": "ethernet_switch",
-            "gateways": "ethernet_switch",
+            "zone_switches": "cicso_switch",
+            "gateways": "cicso_switch",
         }
 
         topo = next((t for t in TOPOLOGIES if t.name == payload["topology"]), None)
