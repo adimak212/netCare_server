@@ -1,0 +1,43 @@
+@startuml NetCare_Protocols
+
+title Communication Protocols in NetCare System
+
+actor User
+
+package "Frontend (React)" {
+  [UI]
+}
+
+package "Backend (Node.js + Express)" {
+  [REST API]
+  [WebSocket Server]
+}
+
+package "Algorithm (Python)" {
+  [Algorithm Engine]
+}
+
+package "External Systems" {
+  [MongoDB]
+  [GNS3 Devices]
+}
+
+' User interaction
+User --> [UI]
+
+' HTTP communication
+[UI] --> [REST API] : HTTP
+
+' WebSocket communication
+[UI] --> [WebSocket Server] : WebSocket
+
+' Backend to Algorithm
+[REST API] --> [Algorithm Engine] : Internal Call
+
+' Database communication
+[REST API] --> [MongoDB] : DB Queries
+
+' Network communication
+[WebSocket Server] --> [GNS3 Devices] : TCP / Telnet
+
+@enduml

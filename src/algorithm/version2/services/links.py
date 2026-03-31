@@ -11,7 +11,7 @@ def build_links(
     topology: str,
     *,
     hosts_per_switch: int = 4,
-    switch_ports: int = 8,
+    switch_ports: int = 16,
     cloud_ports: int = 8,
 ) -> List[Link]:
 
@@ -39,7 +39,7 @@ def build_links(
         if nt == "vpcs":
             pool = [{"adapter_number": 0, "port_number": 0, "port": "e0"}]
         elif nt == "ethernet_switch":
-            pool = [{"adapter_number": 0, "port_number": i, "port": f"e{i}"} for i in range(switch_ports)]
+            pool = [{"adapter_number": i , "port_number": 0, "port": f"Gi{i // 4}/{i % 4}"} for i in range(switch_ports)]
         elif nt == "cloud":
             pool = [{"adapter_number": 0, "port_number": i, "port": f"e{i}"} for i in range(cloud_ports)]
         elif nt == "dynamips":

@@ -55,7 +55,6 @@ class TopologyRanker:
         for topology in self.topologies:
             try:
                 normalized = topology.normalize(params)
-                #demand = self._build_demand_from_topology(topology, normalized)
                 demand = topology.to_pattern_demand(normalized)
                 solve_result = self._solve_for_demand(topology.key, params, normalized, demand)
 

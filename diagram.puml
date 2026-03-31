@@ -1,0 +1,45 @@
+@startuml NetCare_Advanced_Architecture
+
+title NetCare Detailed Architecture
+
+actor User
+
+package "Frontend (React)" {
+  [Input Form]
+  [Network Display]
+  [Control Panel]
+}
+
+package "Backend (Node.js)" {
+  [Express API]
+  [WebSocket Service]
+}
+
+package "Python Algorithm" {
+  [Demand Processing]
+  [Pattern Generator]
+  [Pattern Solver]
+}
+
+package "External Systems" {
+  [MongoDB]
+  [GNS3 Simulation]
+}
+
+User --> [Input Form]
+
+[Input Form] --> [Express API] : HTTP Request
+[Control Panel] --> [WebSocket Service] : Real-time Commands
+
+[Express API] --> [Demand Processing]
+[Demand Processing] --> [Pattern Generator]
+[Pattern Generator] --> [Pattern Solver]
+
+[Express API] --> [MongoDB]
+
+[WebSocket Service] --> [GNS3 Simulation] : TCP / Telnet
+
+[Pattern Solver] --> [Express API]
+[Express API] --> [Network Display]
+
+@enduml

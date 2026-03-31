@@ -1,0 +1,145 @@
+[
+    {
+        "node_id": "10.10.10.10",
+        "name": "PC_10",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.20",
+        "name": "PC_20",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.30",
+        "name": "PC_30",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.40",
+        "name": "PC_40",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.200",
+        "name": "PC_200",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.201",
+        "name": "PC_201",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.202",
+        "name": "PC_202",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "192.168.1.1",
+        "name": "PC_1",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "192.168.1.107",
+        "name": "PC_107",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "192.168.1.212",
+        "name": "PC_212",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "192.168.1.219",
+        "name": "PC_219",
+        "modelType": "Generic PC",
+        "node_type": "vpcs",
+        "icon": "vpcs.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 0
+    },
+    {
+        "node_id": "10.10.10.1",
+        "name": "R1",
+        "modelType": "Cisco Device",
+        "node_type": "cisco_switch",
+        "icon": "router.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 23
+    },
+    {
+        "node_id": "10.10.10.100",
+        "name": "ESW1",
+        "modelType": "Cisco Device",
+        "node_type": "cisco_switch",
+        "icon": "router.png",
+        "x": 0,
+        "y": 0,
+        "ports": [],
+        "console": 23
+    }
+]

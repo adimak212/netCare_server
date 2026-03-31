@@ -123,8 +123,7 @@ class TopologyEvaluator:
             redundancy_norm=redundancy_norm,
         )
 
-        # הפחתת ענישה לטופולוגיות שנותנות ערך גבוה
-        # benefit גבוה מוריד חלק מהעונש, אבל לא מוחק אותו
+    
         fair_cost_norm = base_cost_norm * (1.0 - 0.4 * benefit_score)
 
         return self._clamp01(fair_cost_norm)
@@ -136,12 +135,7 @@ class TopologyEvaluator:
         rack_count: int,
         waste_score: float,
     ) -> float:
-        """
-        penalty על יעילות משאבים:
-        נמדד בצורה יחסית לביקוש.
-        0 = יעיל מאוד
-        1 = לא יעיל
-        """
+      
         demand_size = max(float(demand.total_items()), 1.0)
 
         relative_waste = waste_score / demand_size
@@ -178,7 +172,6 @@ class TopologyEvaluator:
         rack_count: int,
         waste_score: float,
     ) -> TopologyEvaluation:
-        # חשיבות יחסית שהמשתמש נתן
         ws, wr, wc = preferences.normalized_importance()
 
         scalability_raw = topology_metrics.get("scalability", 0.0)
@@ -210,7 +203,6 @@ class TopologyEvaluator:
             waste_score=waste_score,
         )
 
-        # נוסיף גם את resource_penalty למשקלים בצורה מנורמלת
         total_weight = ws + wr + wc + self.resource_penalty_weight
 
         if total_weight == 0:
@@ -224,11 +216,6 @@ class TopologyEvaluator:
             wc_n = wc / total_weight
             we_n = self.resource_penalty_weight / total_weight
 
-        # יעד אידיאלי:
-        # scalability -> 1
-        # redundancy -> 1
-        # fair_cost -> 0
-        # resource_penalty -> 0
         distance = math.sqrt(
             ws_n * (1.0 - scalability_norm) ** 2 +
             wr_n * (1.0 - redundancy_norm) ** 2 +
@@ -236,7 +223,6 @@ class TopologyEvaluator:
             we_n * (resource_penalty_norm - 0.0) ** 2
         )
 
-        # גדול יותר = טוב יותר
         final_score = self._clamp01(1.0 - distance)
 
         return TopologyEvaluation(

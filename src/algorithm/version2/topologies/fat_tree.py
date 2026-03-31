@@ -24,7 +24,7 @@ class FatTreeTopology(TopologyBase):
         agg_switches = groups * self.agg_switches_per_group
         total_switches = edge_switches + agg_switches
         core_routers = max(1, ceil(agg_switches / ROUTER_PORTS_COUNT))
-        pods = groups
+        pods = groups   
 
         return {
             "pcs": pcs,

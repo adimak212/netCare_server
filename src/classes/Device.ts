@@ -4,7 +4,7 @@ class Device {
   icon?: string;
   x?: number;
   y?: number;
-  node_type?: "ethernet_switch" | "dynamips" | "vpcs" | "cloud" | "cicso_switch";
+  node_type?: "ethernet_switch" | "dynamips" | "vpcs" | "cloud" | "cicso_switch" | "qemu";
   ports?: {
     link_type: string,
     port_number: number,
@@ -12,6 +12,7 @@ class Device {
   }[];
   name? : string;
   console?: number;
+  slot1? : string
 }
 
 class PC extends Device {

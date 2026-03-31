@@ -1,0 +1,159 @@
+{
+    "nodes": [
+        {
+            "node_id": "10.10.10.1",
+            "name": "Core-Router",
+            "modelType": "Cisco",
+            "node_type": "dynamips",
+            "icon": "router.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 23
+        },
+        {
+            "node_id": "10.10.10.100",
+            "name": "ESW1",
+            "modelType": "Cisco",
+            "node_type": "cisco_switch",
+            "icon": "switch.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 23
+        },
+        {
+            "node_id": "10.10.10.201",
+            "name": "ESW3",
+            "modelType": "Cisco",
+            "node_type": "cisco_switch",
+            "icon": "switch.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 23
+        },
+        {
+            "node_id": "10.10.10.200",
+            "name": "ESW2",
+            "modelType": "Cisco",
+            "node_type": "cisco_switch",
+            "icon": "switch.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 23
+        },
+        {
+            "node_id": "10.10.10.202",
+            "name": "ESW4",
+            "modelType": "Cisco",
+            "node_type": "cisco_switch",
+            "icon": "switch.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 23
+        },
+        {
+            "node_id": "10.10.10.10",
+            "name": "PC_10",
+            "modelType": "Generic PC",
+            "node_type": "vpcs",
+            "icon": "vpcs.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 0
+        },
+        {
+            "node_id": "10.10.10.20",
+            "name": "PC_20",
+            "modelType": "Generic PC",
+            "node_type": "vpcs",
+            "icon": "vpcs.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 0
+        },
+        {
+            "node_id": "10.10.10.30",
+            "name": "PC_30",
+            "modelType": "Generic PC",
+            "node_type": "vpcs",
+            "icon": "vpcs.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 0
+        },
+        {
+            "node_id": "10.10.10.40",
+            "name": "PC_40",
+            "modelType": "Generic PC",
+            "node_type": "vpcs",
+            "icon": "vpcs.png",
+            "x": 0,
+            "y": 0,
+            "ports": [],
+            "console": 0
+        }
+    ],
+    "links": [
+        {
+            "source": "10.10.10.1",
+            "target": "10.10.10.100",
+            "source_port": "FastEthernet1/0",
+            "target_port": "GigabitEthernet0/0"
+        },
+        {
+            "source": "10.10.10.100",
+            "target": "10.10.10.201",
+            "source_port": "GigabitEthernet0/2",
+            "target_port": "GigabitEthernet0/1"
+        },
+        {
+            "source": "10.10.10.100",
+            "target": "10.10.10.202",
+            "source_port": "GigabitEthernet0/1",
+            "target_port": "GigabitEthernet0/0"
+        },
+        {
+            "source": "10.10.10.201",
+            "target": "10.10.10.200",
+            "source_port": "GigabitEthernet0/0",
+            "target_port": "GigabitEthernet0/0"
+        },
+        {
+            "source": "10.10.10.200",
+            "target": "10.10.10.202",
+            "source_port": "GigabitEthernet0/1",
+            "target_port": "GigabitEthernet0/1"
+        },
+        {
+            "source": "10.10.10.202",
+            "target": "10.10.10.10",
+            "source_port": "Vlan1",
+            "target_port": "eth0"
+        },
+        {
+            "source": "10.10.10.1",
+            "target": "10.10.10.20",
+            "source_port": "FastEthernet1/0",
+            "target_port": "eth0"
+        },
+        {
+            "source": "10.10.10.1",
+            "target": "10.10.10.30",
+            "source_port": "FastEthernet1/0",
+            "target_port": "eth0"
+        },
+        {
+            "source": "10.10.10.1",
+            "target": "10.10.10.40",
+            "source_port": "FastEthernet1/0",
+            "target_port": "eth0"
+        }
+    ]
+}

@@ -65,15 +65,11 @@ class PatternGenerator:
         current_resources: Resources,
         patterns: List[Pattern],
     ) -> None:
-        # Early pruning
         if not current_resources.fits_in(rack_resources):
             return
-
-        # Leaf: all item types assigned
         if index == len(item_types):
             if current_counts.total_items() == 0:
                 return
-
             pattern = Pattern(
                 bin_type=bin_type,
                 counts=current_counts,
@@ -84,7 +80,6 @@ class PatternGenerator:
             if self._is_pattern_useful(pattern):
                 patterns.append(pattern)
             return
-
         item_name = item_types[index]
         template = self.templates[item_name]
 
@@ -93,9 +88,6 @@ class PatternGenerator:
             rack_resources=rack_resources,
             used_resources=current_resources,
         )
-
-        # Try small-to-large or large-to-small are both valid.
-        # Small-to-large is a bit easier to reason about and debug.
         for qty in range(max_qty + 1):
             next_counts = DemandVector(
                 pc=current_counts.pc,
@@ -107,7 +99,6 @@ class PatternGenerator:
 
             next_resources = current_resources + (template * qty)
 
-            # Since qty grows monotonically, once it doesn't fit, larger qty won't fit either.
             if not next_resources.fits_in(rack_resources):
                 break
 
