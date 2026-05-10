@@ -21,11 +21,11 @@ def main():
     for topology in topologies:
         normalized = topology.normalize(params)
 
-        print("=" * 40)
-        print("Topology:", topology.key)
-        print("Name:", topology.name)
-        print("Metrics:", topology.Scalability, topology.Redundancy, topology.Cost)
-        print("Normalized:", normalized)
+        #("=" * 40)
+        #("Topology:", topology.key)
+        #("Name:", topology.name)
+        #("Metrics:", topology.Scalability, topology.Redundancy, topology.Cost)
+        #("Normalized:", normalized)
 
 
 if __name__ == "__main__":

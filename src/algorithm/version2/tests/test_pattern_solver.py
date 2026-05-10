@@ -43,7 +43,7 @@ def main():
     solver = PatternSolver(patterns)
     result = solver.solve(demand)
 
-    print(result.as_dict())
+    #(result.as_dict())
 
 
 if __name__ == "__main__":

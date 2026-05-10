@@ -10,9 +10,7 @@ from src.algorithm.version2.topologies import (
     SDNTopology,
     HybridTopology,
 )
-from src.algorithm.version2.solvers.pattern_generator import PatternGenerator
-from src.algorithm.version2.solvers.pattern_solver import PatternSolver
-from src.algorithm.version2.services.topology_evaluator import TopologyEvaluator
+
 from src.algorithm.version2.services.topology_ranker import TopologyRanker
 from src.algorithm.version2.services.nodes import build_gns3_nodes, position_nodes
 from src.algorithm.version2.services.links import build_links

@@ -1,159 +1,208 @@
 {
-    "nodes": [
+    "canvasComponnents": [
         {
             "node_id": "10.10.10.1",
             "name": "Core-Router",
-            "modelType": "Cisco",
             "node_type": "dynamips",
-            "icon": "router.png",
             "x": 0,
             "y": 0,
-            "ports": [],
-            "console": 23
+            "status": "stopped"
         },
         {
-            "node_id": "10.10.10.100",
-            "name": "ESW1",
-            "modelType": "Cisco",
-            "node_type": "cisco_switch",
-            "icon": "switch.png",
+            "node_id": "10.10.10.203",
+            "name": "Switch",
+            "node_type": "ethernet_switch",
             "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 23
+            "y": 200,
+            "status": "stopped"
         },
         {
             "node_id": "10.10.10.201",
             "name": "ESW3",
-            "modelType": "Cisco",
-            "node_type": "cisco_switch",
-            "icon": "switch.png",
-            "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 23
+            "node_type": "ethernet_switch",
+            "x": 250,
+            "y": 200,
+            "status": "stopped"
         },
         {
             "node_id": "10.10.10.200",
             "name": "ESW2",
-            "modelType": "Cisco",
-            "node_type": "cisco_switch",
-            "icon": "switch.png",
-            "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 23
+            "node_type": "ethernet_switch",
+            "x": 500,
+            "y": 200,
+            "status": "stopped"
         },
         {
             "node_id": "10.10.10.202",
             "name": "ESW4",
-            "modelType": "Cisco",
-            "node_type": "cisco_switch",
-            "icon": "switch.png",
-            "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 23
-        },
-        {
-            "node_id": "10.10.10.10",
-            "name": "PC_10",
-            "modelType": "Generic PC",
-            "node_type": "vpcs",
-            "icon": "vpcs.png",
-            "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 0
+            "node_type": "ethernet_switch",
+            "x": 750,
+            "y": 200,
+            "status": "stopped"
         },
         {
             "node_id": "10.10.10.20",
             "name": "PC_20",
-            "modelType": "Generic PC",
             "node_type": "vpcs",
-            "icon": "vpcs.png",
             "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 0
+            "y": 400,
+            "status": "stopped"
         },
         {
             "node_id": "10.10.10.30",
             "name": "PC_30",
-            "modelType": "Generic PC",
             "node_type": "vpcs",
-            "icon": "vpcs.png",
-            "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 0
+            "x": 180,
+            "y": 400,
+            "status": "stopped"
         },
         {
             "node_id": "10.10.10.40",
             "name": "PC_40",
-            "modelType": "Generic PC",
             "node_type": "vpcs",
-            "icon": "vpcs.png",
-            "x": 0,
-            "y": 0,
-            "ports": [],
-            "console": 0
+            "x": 360,
+            "y": 400,
+            "status": "stopped"
+        },
+        {
+            "node_id": "10.10.10.10",
+            "name": "PC_10",
+            "node_type": "vpcs",
+            "x": 540,
+            "y": 400,
+            "status": "stopped"
         }
     ],
-    "links": [
+    "connections": [
         {
-            "source": "10.10.10.1",
-            "target": "10.10.10.100",
-            "source_port": "FastEthernet1/0",
-            "target_port": "GigabitEthernet0/0"
+            "link_id": "fc64306c-89fe-46c5-ba3d-8a795f15ec52",
+            "from": {
+                "node_id": "10.10.10.1",
+                "adapter_number": 1,
+                "port_number": 0
+            },
+            "to": {
+                "node_id": "10.10.10.203",
+                "adapter_number": 0,
+                "port_number": 0
+            }
         },
         {
-            "source": "10.10.10.100",
-            "target": "10.10.10.201",
-            "source_port": "GigabitEthernet0/2",
-            "target_port": "GigabitEthernet0/1"
+            "link_id": "f9ec7d9a-527f-40aa-aa21-3ebd91f8aa4c",
+            "from": {
+                "node_id": "10.10.10.203",
+                "adapter_number": 0,
+                "port_number": 0
+            },
+            "to": {
+                "node_id": "10.10.10.1",
+                "adapter_number": 1,
+                "port_number": 0
+            }
         },
         {
-            "source": "10.10.10.100",
-            "target": "10.10.10.202",
-            "source_port": "GigabitEthernet0/1",
-            "target_port": "GigabitEthernet0/0"
+            "link_id": "7cd72b52-56d5-4bfb-9ca0-135624284437",
+            "from": {
+                "node_id": "10.10.10.203",
+                "adapter_number": 0,
+                "port_number": 1
+            },
+            "to": {
+                "node_id": "10.10.10.201",
+                "adapter_number": 0,
+                "port_number": 1
+            }
         },
         {
-            "source": "10.10.10.201",
-            "target": "10.10.10.200",
-            "source_port": "GigabitEthernet0/0",
-            "target_port": "GigabitEthernet0/0"
+            "link_id": "bc744382-5d9b-4bcd-94d8-91e39758d22a",
+            "from": {
+                "node_id": "10.10.10.201",
+                "adapter_number": 0,
+                "port_number": 1
+            },
+            "to": {
+                "node_id": "10.10.10.203",
+                "adapter_number": 0,
+                "port_number": 1
+            }
         },
         {
-            "source": "10.10.10.200",
-            "target": "10.10.10.202",
-            "source_port": "GigabitEthernet0/1",
-            "target_port": "GigabitEthernet0/1"
+            "link_id": "ba59d054-a906-4abe-bca5-eea9bf3d80f5",
+            "from": {
+                "node_id": "10.10.10.201",
+                "adapter_number": 0,
+                "port_number": 0
+            },
+            "to": {
+                "node_id": "10.10.10.200",
+                "adapter_number": 0,
+                "port_number": 0
+            }
         },
         {
-            "source": "10.10.10.202",
-            "target": "10.10.10.10",
-            "source_port": "Vlan1",
-            "target_port": "eth0"
+            "link_id": "e8d29c82-d7a1-4362-8086-1473d2a93fd0",
+            "from": {
+                "node_id": "10.10.10.200",
+                "adapter_number": 0,
+                "port_number": 0
+            },
+            "to": {
+                "node_id": "10.10.10.201",
+                "adapter_number": 0,
+                "port_number": 0
+            }
         },
         {
-            "source": "10.10.10.1",
-            "target": "10.10.10.20",
-            "source_port": "FastEthernet1/0",
-            "target_port": "eth0"
+            "link_id": "21664d8e-7448-4e62-aba1-ffe3af8cf75a",
+            "from": {
+                "node_id": "10.10.10.200",
+                "adapter_number": 0,
+                "port_number": 1
+            },
+            "to": {
+                "node_id": "10.10.10.202",
+                "adapter_number": 0,
+                "port_number": 1
+            }
         },
         {
-            "source": "10.10.10.1",
-            "target": "10.10.10.30",
-            "source_port": "FastEthernet1/0",
-            "target_port": "eth0"
+            "link_id": "35ccb6c4-095e-44f0-9f49-c19c35d0f3fc",
+            "from": {
+                "node_id": "10.10.10.202",
+                "adapter_number": 0,
+                "port_number": 0
+            },
+            "to": {
+                "node_id": "10.10.10.203",
+                "adapter_number": 0,
+                "port_number": 2
+            }
         },
         {
-            "source": "10.10.10.1",
-            "target": "10.10.10.40",
-            "source_port": "FastEthernet1/0",
-            "target_port": "eth0"
+            "link_id": "03f85241-b12f-4508-a0c4-0745271a0221",
+            "from": {
+                "node_id": "10.10.10.202",
+                "adapter_number": 0,
+                "port_number": 1
+            },
+            "to": {
+                "node_id": "10.10.10.200",
+                "adapter_number": 0,
+                "port_number": 1
+            }
+        },
+        {
+            "link_id": "7547640f-57d4-4bd0-b8f3-d821cd459715",
+            "from": {
+                "node_id": "10.10.10.203",
+                "adapter_number": 0,
+                "port_number": 2
+            },
+            "to": {
+                "node_id": "10.10.10.202",
+                "adapter_number": 0,
+                "port_number": 0
+            }
         }
     ]
 }

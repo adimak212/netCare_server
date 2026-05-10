@@ -1,196 +1,246 @@
 import asyncio
 import re
-import json
 import telnetlib3
 import ipaddress
+
 
 class NetCareScanner:
     def __init__(self, username, password, network_cidr):
         self.username = username
         self.password = password
-        self.visited_ips = set()
-        self.infra_ips = set()
-        self.all_arp_entries = {}
-        self.devices_list = []
-        self.links_list = []
+
+        self.visited = set()
+        self.devices = {}
+        self.neighbors = []
+        self.arp_table = {}          # ip -> clean_mac
+        self.switch_mac_tables = {}  # sw_ip -> { clean_mac -> port }
+
         try:
             self.network = ipaddress.ip_network(network_cidr, strict=False)
-        except:
-            raise
+        except Exception:
+            self.network = None
 
-    def is_in_network(self, ip_str):
+    # ------------------------------------------------------------------ helpers
+
+    def is_valid_ip(self, ip):
         try:
-            return ipaddress.ip_address(ip_str) in self.network
-        except:
+            return ipaddress.ip_address(ip) in self.network if self.network else True
+        except Exception:
             return False
 
-    async def capture_output(self, reader):
-        full_output = ""
+    def clean_mac(self, mac):
+        """Normalise any MAC format to 12 lowercase hex chars."""
+        return re.sub(r'[^0-9a-fA-F]', '', mac).lower()
+
+    # ------------------------------------------------------------------ telnet
+
+    async def connect(self, host):
+        return await telnetlib3.open_connection(host, 23)
+
+    async def send(self, writer, cmd):
+        writer.write(cmd + "\n")
+        await writer.drain()
+        await asyncio.sleep(0.4)
+
+    async def read(self, reader, timeout=1.2):
+        data = ""
         try:
             while True:
-                chunk = await asyncio.wait_for(reader.read(4096), timeout=1.5)
+                chunk = await asyncio.wait_for(reader.read(4096), timeout=timeout)
                 if not chunk:
                     break
-                full_output += chunk
-        except asyncio.TimeoutError:
+                data += chunk
+        except Exception:
             pass
-        return full_output
+        return data
 
-    def is_pc_mac(self, mac_addr):
-        return mac_addr.lower().startswith("0050.79")
+    # ------------------------------------------------------------------ ping sweep
 
-    def add_link(self, source, target, s_port, t_port):
-        for link in self.links_list:
-            if (link["source"] == source and link["target"] == target) or \
-               (link["source"] == target and link["target"] == source):
-                return
-        self.links_list.append({
-            "source": source,
-            "target": target,
-            "source_port": s_port,
-            "target_port": t_port
-        })
-
-    def determine_node_type(self, name, capabilities_str):
+    async def ping_sweep(self, writer, reader, host):
         """
-        מסווג מכשיר לפי מחרוזת ה-Capabilities שהתקבלה מה-CDP של השכן.
-        כך נמנע מלקרוא capabilities של שכנים אחרים ולטעות בסיווג.
+        שולח ping לכל ה-IPs הידועים מה-ARP table (לא כולל את המכשיר עצמו).
+        זה גורם לסוויץ' לאכלס את ה-MAC table שלו לפני שאנחנו קוראים אותו.
         """
-        cap_lower = capabilities_str.lower()
+        known_ips = list(self.arp_table.keys())
 
-        # עדיפות לסוויץ': אם מופיעה המילה switch בכל צורה
-        if 'switch' in cap_lower:
-            return "cisco_switch", "switch.png"
-
-        # ראוטר טהור: רק router ללא switch
-        if 'router' in cap_lower:
-            return "dynamips", "router.png"
-
-        # גיבוי לפי שם המכשיר אם CDP לא סיפק מידע
-        name_lower = name.lower()
-        if "esw" in name_lower or "switch" in name_lower:
-            return "cisco_switch", "switch.png"
-
-        return "dynamips", "router.png"
-
-    async def scan_device(self, host, device_name="Unknown", capabilities_str=""):
-        """
-        סורק מכשיר בודד באמצעות Telnet.
-        capabilities_str מגיע מה-CDP block של המכשיר שגילה אותנו,
-        ולכן מתאר אותנו בלבד — ולא את שכנינו.
-        """
-        if not self.is_in_network(host) or host in self.visited_ips:
+        if not known_ips:
             return
 
-        print(f"[NetCare] >>> Scanning Infrastructure: {device_name} ({host})")
-        self.visited_ips.add(host)
-        self.infra_ips.add(host)
+        for ip_str in known_ips:
+            if ip_str != host:
+                writer.write(f"ping {ip_str} repeat 1 timeout 1\n")
+                await writer.drain()
+                await asyncio.sleep(0.05)
+
+        # ממתינים שכל ה-pings יסתיימו ומרוקנים את ה-buffer
+        await asyncio.sleep(2.0)
+        await self.read(reader, timeout=3.0)
+
+    # ------------------------------------------------------------------ scan
+
+    async def scan_device(self, host, name="Unknown"):
+        if host in self.visited or not self.is_valid_ip(host):
+            return
+
+        self.visited.add(host)
+
+        if host not in self.devices:
+            self.devices[host] = {"ip": host, "name": name, "is_pc": False}
 
         try:
-            reader, writer = await asyncio.wait_for(
-                telnetlib3.open_connection(host, 23), timeout=5.0
-            )
+            reader, writer = await self.connect(host)
 
-            async def send_cmd(cmd):
-                writer.write(cmd + '\r\n')
-                await writer.drain()
-                await asyncio.sleep(0.8)
+            await self.send(writer, self.username)
+            await self.send(writer, self.password)
+            await self.send(writer, "terminal length 0")
+            await self.read(reader)
 
-            await send_cmd(self.username)
-            await send_cmd(self.password)
-            await send_cmd('terminal length 0')
-            await self.capture_output(reader)
+            # ── CDP ──────────────────────────────────────────────────────────
+            await self.send(writer, "show cdp neighbors detail")
+            cdp = await self.read(reader)
 
-            # --- CDP ---
-            await send_cmd('show cdp neighbors detail')
-            cdp_raw = await self.capture_output(reader)
+            for block in cdp.split("Device ID:")[1:]:
+                try:
+                    neighbor_name = block.strip().split("\n")[0].strip()
+                    ip_m    = re.search(r"IP address: (\S+)", block)
+                    iface_m = re.search(r"Interface: (.*?),", block)
+                    port_m  = re.search(r"Port ID \(outgoing port\): (.*)", block)
 
-            infra_found = []
-            for block in cdp_raw.split('-------------------------'):
-                n_ip      = re.search(r'IP address: (\d{1,3}(?:\.\d{1,3}){3})', block)
-                n_name    = re.search(r'Device ID: (.*?)\s', block)
-                n_cap     = re.search(r'Capabilities:\s+(.*)', block, re.IGNORECASE)
-                port_info = re.search(
-                    r'Interface: (.*?),.*?Port ID \(outgoing port\): (.*?)\s',
-                    block, re.DOTALL
-                )
-
-                if n_ip and n_name and port_info:
-                    nip = n_ip.group(1)
-                    neighbor_caps = n_cap.group(1).strip() if n_cap else ""
-
-                    if self.is_in_network(nip):
-                        self.infra_ips.add(nip)
-                        self.add_link(
-                            host, nip,
-                            port_info.group(1).strip(),
-                            port_info.group(2).strip()
-                        )
-                        if nip not in self.visited_ips:
-                            infra_found.append({
-                                "ip":           nip,
-                                "name":         n_name.group(1).strip(),
-                                "capabilities": neighbor_caps   # ← capabilities של השכן בלבד
+                    if ip_m and iface_m and port_m:
+                        nip = ip_m.group(1)
+                        if self.is_valid_ip(nip):
+                            if nip not in self.devices:
+                                self.devices[nip] = {
+                                    "ip": nip,
+                                    "name": neighbor_name,
+                                    "is_pc": False,
+                                }
+                            self.neighbors.append({
+                                "src":      host,
+                                "dst":      nip,
+                                "src_port": iface_m.group(1).strip(),
+                                "dst_port": port_m.group(1).strip(),
                             })
+                            await self.scan_device(nip, neighbor_name)
+                except Exception:
+                    continue
 
-            # --- ARP ---
-            await send_cmd('show ip arp')
-            arp_raw = await self.capture_output(reader)
-            matches = re.findall(
-                r'(\d{1,3}(?:\.\d{1,3}){3})\s+.*?\s+.*?\s+.*?\s+(\S+)', arp_raw
+            # ── ARP ──────────────────────────────────────────────────────────
+            await self.send(writer, "show ip arp")
+            arp = await self.read(reader)
+
+            for m in re.finditer(
+                r"(\d+\.\d+\.\d+\.\d+)\s+\S+\s+([0-9a-fA-F]{4}\.[0-9a-fA-F]{4}\.[0-9a-fA-F]{4}"
+                r"|[0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-]"
+                r"[0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2}[:\-][0-9a-fA-F]{2})\s+ARPA",
+                arp
+            ):
+                ip_addr, mac_raw = m.group(1), m.group(2)
+                if self.is_valid_ip(ip_addr):
+                    self.arp_table[ip_addr] = self.clean_mac(mac_raw)
+
+            # ── PING SWEEP (לפני MAC table) ──────────────────────────────────
+            # מפנג את כל ה-IPs הידועים כדי שה-switch יאכלס את ה-MAC table שלו
+            await self.ping_sweep(writer, reader, host)
+
+            # ── MAC TABLE ────────────────────────────────────────────────────
+            await self.send(writer, "show mac address-table")
+            mac_raw_out = await self.read(reader, timeout=2.0)
+
+            entries = re.findall(
+                r"\d+\s+([0-9a-fA-F]{4}\.[0-9a-fA-F]{4}\.[0-9a-fA-F]{4})\s+DYNAMIC\s+(\S+)",
+                mac_raw_out
             )
-            for ip, interface in matches:
-                if self.is_in_network(ip) and ip != host:
-                    self.all_arp_entries[ip] = {"parent": host, "interface": interface}
-
-            # סיווג המכשיר הנוכחי לפי ה-capabilities שהתקבלו מהשכן שגילה אותנו
-            node_type, icon = self.determine_node_type(device_name, capabilities_str)
-            self.devices_list.append({
-                "node_id":   host,
-                "name":      device_name,
-                "modelType": "Cisco",
-                "node_type": node_type,
-                "icon":      icon,
-                "x":         0,
-                "y":         0,
-                "ports":     [],
-                "console":   23
-            })
+            if entries:
+                self.switch_mac_tables[host] = {
+                    self.clean_mac(mac): port for mac, port in entries
+                }
 
             writer.close()
 
-            # סריקה רקורסיבית — כל שכן מקבל את ה-capabilities שלו בלבד
-            for neighbor in infra_found:
-                await self.scan_device(
-                    neighbor["ip"],
-                    neighbor["name"],
-                    neighbor["capabilities"]
-                )
+        except Exception:
+            pass
 
-        except Exception as e:
-            print(f"  [X] Error on {host}: {e}")
+    # ------------------------------------------------------------------ finalize
 
     def finalize_pcs(self):
-        """מוסיף PCs שהתגלו ב-ARP אך אינם חלק מהתשתית."""
-        for ip, info in self.all_arp_entries.items():
-            if ip not in self.infra_ips:
-                self.devices_list.append({
-                    "node_id":   ip,
-                    "name":      f"PC_{ip.split('.')[-1]}",
-                    "modelType": "Generic PC",
-                    "node_type": "vpcs",
-                    "icon":      "vpcs.png",
-                    "x":         0,
-                    "y":         0,
-                    "ports":     [],
-                    "console":   0
-                })
-                self.infra_ips.add(ip)
-                self.add_link(info["parent"], ip, info["interface"], "eth0")
+        """
+        זיהוי PCs בשתי שיטות משלימות:
 
-    def save_to_json(self):
-        self.finalize_pcs()
-        output = {"nodes": self.devices_list, "links": self.links_list}
-        with open("topology_data.json", "w") as f:
-            json.dump(output, f, indent=4)
-        print(f"\n[NetCare] Scan Complete. Saved to topology_data.json")
+        שיטה א' – מה-ARP של ה-router (אמינה תמיד):
+          כל IP ב-ARP שאינו מכשיר תשתית ידוע = PC.
+          מנסה למצוא את פרטי החיבור (switch + port) מה-MAC tables.
+
+        שיטה ב' – מה-MAC tables של הסוויצ'ים (רק MACs שיש להם IP ב-ARP):
+          עבור כל MAC ב-MAC table שיש לו IP ב-ARP וה-IP אינו תשתית → PC.
+          זה מכסה מקרים שה-router לא ראה ב-ARP.
+        """
+
+        infra_ips:  set[str] = set(
+            ip for ip, d in self.devices.items() if not d.get("is_pc")
+        )
+        infra_macs: set[str] = set(
+            mac for ip, mac in self.arp_table.items() if ip in infra_ips
+        )
+
+        mac_to_ip: dict[str, str] = {mac: ip for ip, mac in self.arp_table.items()}
+
+        # ── שיטה א': כל IP ב-ARP שאינו תשתית ──────────────────────────────
+        pc_ips_from_arp: set[str] = set(
+            ip for ip in self.arp_table if ip not in infra_ips
+        )
+
+        for pc_ip in pc_ips_from_arp:
+            pc_mac = self.arp_table[pc_ip]
+
+            parent_switch = None
+            parent_port   = None
+
+            for sw_ip, mac_table in self.switch_mac_tables.items():
+                if pc_mac in mac_table:
+                    parent_switch = sw_ip
+                    parent_port   = mac_table[pc_mac]
+                    break
+
+            self.devices[pc_ip] = {
+                "ip":            pc_ip,
+                "name":          f"PC_{pc_ip.split('.')[-1]}",
+                "is_pc":         True,
+                "mac":           pc_mac,
+                "parent_switch": parent_switch,
+                "port":          parent_port,
+            }
+
+        # ── שיטה ב': MAC table entries עם IP ידוע שאינם תשתית ──────────────
+        for sw_ip, mac_table in self.switch_mac_tables.items():
+            for mac, port in mac_table.items():
+
+                if mac in infra_macs:
+                    continue
+
+                ip_match = mac_to_ip.get(mac)
+                if not ip_match or ip_match in infra_ips:
+                    continue
+
+                existing = self.devices.get(ip_match)
+                if existing and existing.get("parent_switch"):
+                    continue
+
+                self.devices[ip_match] = {
+                    "ip":            ip_match,
+                    "name":          f"PC_{ip_match.split('.')[-1]}",
+                    "is_pc":         True,
+                    "mac":           mac,
+                    "parent_switch": sw_ip,
+                    "port":          port,
+                }
+
+    # ------------------------------------------------------------------ props
+
+    @property
+    def devices_list(self):
+        return list(self.devices.values())
+
+    @property
+    def links_list(self):
+        return self.neighbors

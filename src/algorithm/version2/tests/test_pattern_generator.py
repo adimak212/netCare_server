@@ -23,10 +23,10 @@ def main():
 
     patterns = generator.generate_for_bin_type("rack")
 
-    print("patterns:", len(patterns))
+    #("patterns:", len(patterns))
 
     for p in patterns[:10]:
-        print(p.as_dict())
+        #(p.as_dict())
 
 
 if __name__ == "__main__":

@@ -11,8 +11,8 @@ def main():
 
     demand = topology.to_pattern_demand(normalized)
 
-    print(normalized)
-    print(demand.as_dict())
+    #(normalized)
+    #(demand.as_dict())
 
 
 if __name__ == "__main__":

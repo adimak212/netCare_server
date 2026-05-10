@@ -52,7 +52,7 @@ def main(params: Dict[str, Any]):
         data = json.loads(params["normalized"]) if isinstance(params.get("normalized"), str) else params.get("normalized", {})
         nodes = build_gns3_nodes(data, node_type_by_type)
         positioned_nodes = position_nodes(nodes)
-        #print(positioned_nodes)
+        ##(positioned_nodes)
         links = build_links(nodes, topo.key)
         return {"nodes": positioned_nodes, "links": links}
 

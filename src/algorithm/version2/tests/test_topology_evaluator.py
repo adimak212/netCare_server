@@ -48,7 +48,7 @@ def main():
         waste_score=waste_score,
     )
 
-    print(result.as_dict())
+    #(result.as_dict())
 
 
 if __name__ == "__main__":

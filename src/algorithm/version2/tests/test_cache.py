@@ -5,9 +5,9 @@ def main():
     cache = TopologyCache()
     cache.set("fat_tree", 12, {"result": 1})
 
-    print(cache.get("fat_tree", 12))
+    #(cache.get("fat_tree", 12))
 
-    print("cache size:", cache.size())
+    #("cache size:", cache.size())
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ from src.algorithm.version2.domain.pattern_solver_result import PatternSolveResu
 from src.algorithm.version2.solvers.pattern_generator import PatternGenerator
 from src.algorithm.version2.solvers.pattern_solver import PatternSolver
 from src.algorithm.version2.services.topology_evaluator import TopologyEvaluator
+from src.algorithm.version2.solvers.beam_solver import BeamPatternSolver
 
 from src.algorithm.version2.topologies import (
     FatTreeTopology,
@@ -108,7 +109,7 @@ class TopologyRanker:
             return self._solve_cache[cache_key]
 
         patterns = self._get_all_patterns()
-        solver = PatternSolver(patterns=patterns)
+        solver = BeamPatternSolver(patterns, beam_width=5)
         solve_result = solver.solve(demand)
 
         self._solve_cache[cache_key] = solve_result
