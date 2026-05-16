@@ -21,7 +21,7 @@ class TopologyEvaluator:
         self.equipment_cost_weight = equipment_cost_weight
         self.rack_cost_weight = rack_cost_weight
         self.waste_cost_weight = waste_cost_weight
-
+        self.benefit_lambda = 0.4
         # משקל פנימי קבוע של penalty על יעילות משאבים
         self.resource_penalty_weight = resource_penalty_weight
 
@@ -74,13 +74,6 @@ class TopologyEvaluator:
         scalability_norm: float,
         redundancy_norm: float,
     ) -> float:
-        """
-        cost_norm הוגן:
-        לא עלות מוחלטת, אלא עלות יחסית לביקוש,
-        ואז התאמה לפי benefit של הטופולוגיה.
-        0 = זול/יעיל יחסית
-        1 = יקר/לא יעיל יחסית
-        """
         demand_size = max(float(demand.total_items()), 1.0)
 
         logical_norm = self._clamp01(logical_cost_score / self.MAX_SCORE_10)
@@ -124,7 +117,16 @@ class TopologyEvaluator:
         )
 
     
-        fair_cost_norm = base_cost_norm * (1.0 - 0.4 * benefit_score)
+        benefit_factor = (
+            1.0 +
+            self.benefit_lambda *
+            benefit_score
+        )
+
+        fair_cost_norm = (
+            base_cost_norm /
+            benefit_factor
+        )
 
         return self._clamp01(fair_cost_norm)
 
@@ -172,14 +174,65 @@ class TopologyEvaluator:
         rack_count: int,
         waste_score: float,
     ) -> TopologyEvaluation:
+
         ws, wr, wc = preferences.normalized_importance()
 
-        scalability_raw = topology_metrics.get("scalability", 0.0)
-        redundancy_raw = topology_metrics.get("redundancy", 0.0)
-        logical_cost_raw = topology_metrics.get("logical_cost", 0.0)
+        scalability_raw = topology_metrics.get(
+            "scalability",
+            0.0,
+        )
 
-        scalability_norm = self._clamp01(scalability_raw / self.MAX_SCORE_10)
-        redundancy_norm = self._clamp01(redundancy_raw / self.MAX_SCORE_10)
+        redundancy_raw = topology_metrics.get(
+            "redundancy",
+            0.0,
+        )
+
+        logical_cost_raw = topology_metrics.get(
+            "logical_cost",
+            0.0,
+        )
+
+        connectivity_score = topology_metrics.get(
+            "connectivity_score",
+            0.0,
+        )
+
+        resilience_score = topology_metrics.get(
+            "resilience_score",
+            0.0,
+        )
+
+        degree_balance_score = topology_metrics.get(
+            "degree_balance_score",
+            0.0,
+        )
+
+        diameter_score = topology_metrics.get(
+            "diameter_score",
+            0.0,
+        )
+
+        bottleneck_penalty = topology_metrics.get(
+            "bottleneck_penalty",
+            0.0,
+        )
+
+        scalability_norm = self._clamp01(
+            scalability_raw / self.MAX_SCORE_10
+        )
+
+        redundancy_norm = self._clamp01(
+            redundancy_raw / self.MAX_SCORE_10
+        )
+
+        graph_quality_score = self._clamp01(
+            (
+                connectivity_score * 0.30 +
+                resilience_score * 0.30 +
+                degree_balance_score * 0.20 +
+                diameter_score * 0.20
+            )
+        )
 
         equipment_cost = self.compute_equipment_cost(
             demand=demand,
@@ -196,34 +249,109 @@ class TopologyEvaluator:
             redundancy_norm=redundancy_norm,
         )
 
-        resource_penalty_norm = self.compute_resource_penalty_norm(
-            demand=demand,
-            equipment_cost=equipment_cost,
-            rack_count=rack_count,
-            waste_score=waste_score,
+        resource_penalty_norm = (
+            self.compute_resource_penalty_norm(
+                demand=demand,
+                equipment_cost=equipment_cost,
+                rack_count=rack_count,
+                waste_score=waste_score,
+            )
         )
 
-        total_weight = ws + wr + wc + self.resource_penalty_weight
+        graph_weight = 0.25
+        bottleneck_weight = 0.15
+
+        total_weight = (
+            ws +
+            wr +
+            wc +
+            self.resource_penalty_weight +
+            graph_weight +
+            bottleneck_weight
+        )
 
         if total_weight == 0:
-            ws_n = 1.0 / 3.0
-            wr_n = 1.0 / 3.0
-            wc_n = 1.0 / 3.0
+
+            ws_n = 1.0 / 5.0
+            wr_n = 1.0 / 5.0
+            wc_n = 1.0 / 5.0
+            wg_n = 1.0 / 5.0
+            wb_n = 1.0 / 5.0
             we_n = 0.0
+
         else:
+
             ws_n = ws / total_weight
             wr_n = wr / total_weight
             wc_n = wc / total_weight
-            we_n = self.resource_penalty_weight / total_weight
+
+            wg_n = graph_weight / total_weight
+
+            wb_n = bottleneck_weight / total_weight
+
+            we_n = (
+                self.resource_penalty_weight /
+                total_weight
+            )
+
+        ideal_vector = {
+            "scalability": 1.0,
+            "redundancy": 1.0,
+            "graph_quality": 1.0,
+            "cost": 0.0,
+            "resource_penalty": 0.0,
+            "bottleneck": 0.0,
+        }
 
         distance = math.sqrt(
-            ws_n * (1.0 - scalability_norm) ** 2 +
-            wr_n * (1.0 - redundancy_norm) ** 2 +
-            wc_n * (fair_cost_norm - 0.0) ** 2 +
-            we_n * (resource_penalty_norm - 0.0) ** 2
+
+            ws_n * (
+                scalability_norm -
+                ideal_vector["scalability"]
+            ) ** 2 +
+
+            wr_n * (
+                redundancy_norm -
+                ideal_vector["redundancy"]
+            ) ** 2 +
+
+            wg_n * (
+                graph_quality_score -
+                ideal_vector["graph_quality"]
+            ) ** 2 +
+
+            wc_n * (
+                fair_cost_norm -
+                ideal_vector["cost"]
+            ) ** 2 +
+
+            we_n * (
+                resource_penalty_norm -
+                ideal_vector["resource_penalty"]
+            ) ** 2 +
+
+            wb_n * (
+                bottleneck_penalty -
+                ideal_vector["bottleneck"]
+            ) ** 2
         )
 
-        final_score = self._clamp01(1.0 - distance)
+        max_distance = math.sqrt(
+            ws_n +
+            wr_n +
+            wg_n +
+            wc_n +
+            we_n +
+            wb_n
+        )
+
+        normalized_distance = (
+            distance / max_distance
+        )
+
+        final_score = self._clamp01(
+            1.0 - normalized_distance
+        )
 
         return TopologyEvaluation(
             topology_key=topology_key,
@@ -231,7 +359,9 @@ class TopologyEvaluator:
             demand=demand,
             scalability_score=scalability_norm,
             redundancy_score=redundancy_norm,
-            logical_cost_score=self._clamp01(logical_cost_raw / self.MAX_SCORE_10),
+            logical_cost_score=self._clamp01(
+                logical_cost_raw / self.MAX_SCORE_10
+            ),
             equipment_cost=equipment_cost,
             rack_count=rack_count,
             waste_score=waste_score,

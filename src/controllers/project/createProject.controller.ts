@@ -18,6 +18,7 @@ export const createProject = async (req: Request, res: Response) => {
     const response = await createGNS3Project(GNS3_name);
     const project_id = response.project_id;
     var createNodeResult = await createNode(canvasComponents, project_id);
+    console.log(createNodeResult);
     const linksResult = await createLinks(connections, project_id, createNodeResult!);
 
     const body = {
@@ -42,8 +43,8 @@ export const createProject = async (req: Request, res: Response) => {
 async function createLinks(links: Link[], projectId: string, createNodeResult: Device[] | null) {
   let result = [];
   for (const link of links) {
-    console.log("link from:", link.from.adapter_number, link.from.port_number);
-    console.log("link to:", link.to.adapter_number, link.to.port_number);
+    //console.log("link from:", link.from.adapter_number, link.from.port_number);
+    //console.log("link to:", link.to.adapter_number, link.to.port_number);
     try {
       const node = [
         {
@@ -183,7 +184,7 @@ export async function createNode(canvasComponents: Device[], project_id: string)
          const response = await axios.post(`${GNS3_API}/${project_id}/nodes`, payload, {
           headers: { "Content-Type": "application/json" },
         });
-        console.log(response);
+        //console.log(response);
         results.push(response.data);
         
       }

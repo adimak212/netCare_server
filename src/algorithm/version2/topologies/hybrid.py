@@ -56,7 +56,7 @@ class HybridTopology(TopologyBase):
                 )
             )
 
-        for i in range(n["agg_switches"]):
+        for i in range(n.get("agg_switches", 0)):
             items.append(
                 Item(
                     id=f"hybrid_agg_{i+1}",
