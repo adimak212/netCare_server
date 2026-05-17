@@ -55,10 +55,6 @@ class TopologyEvaluator:
         scalability_norm: float,
         redundancy_norm: float,
     ) -> float:
-        """
-        כמה תועלת טופולוגית הפתרון נותן.
-        גבוה יותר = יותר מצדיק עלות/מורכבות.
-        """
         return self._clamp01(
             0.5 * scalability_norm +
             0.5 * redundancy_norm
@@ -271,7 +267,6 @@ class TopologyEvaluator:
         )
 
         if total_weight == 0:
-
             ws_n = 1.0 / 5.0
             wr_n = 1.0 / 5.0
             wc_n = 1.0 / 5.0
@@ -280,7 +275,6 @@ class TopologyEvaluator:
             we_n = 0.0
 
         else:
-
             ws_n = ws / total_weight
             wr_n = wr / total_weight
             wc_n = wc / total_weight
