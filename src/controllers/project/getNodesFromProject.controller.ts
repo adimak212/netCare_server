@@ -30,6 +30,7 @@ export async function getNodesFromProject(req: Request, res: Response) {
       ports: [],
       status: node.status,
       console: node.console,
+      host: node.console_host,
       slot1: node.properties.slot1,
     }));
     await Promise.all(

@@ -10,9 +10,9 @@ class HybridTopology(TopologyBase):
     name = "Hybrid"
 
     # 0..10 scale
-    Scalability = 8.0
-    Redundancy = 7.5
-    Cost = 4.5
+    Scalability = 80
+    Redundancy = 75
+    Cost = 45
 
     switches_per_router = 3
 

@@ -8,9 +8,9 @@ from src.algorithm.version2.domain.demand_vector import DemandVector
 class SDNTopology(TopologyBase):
     key = "sdn"
     name = "Software Defined Network"
-    Scalability = 9.0
-    Redundancy = 7.0
-    Cost = 4.0
+    Scalability = 90
+    Redundancy = 70
+    Cost = 40
 
     switches_per_router = 3
 

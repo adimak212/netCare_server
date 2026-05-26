@@ -9,9 +9,9 @@ ROUTER_PORTS_COUNT = 3
 class FatTreeTopology(TopologyBase):
     key = "fat_tree"
     name = "Fat Tree"
-    Scalability = 9.5
-    Redundancy = 9.0
-    Cost = 7.0
+    Scalability = 95
+    Redundancy = 90
+    Cost = 70
     pcs_per_group = 4
     edge_switches_per_group = 2
     agg_switches_per_group = 2

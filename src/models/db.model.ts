@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 const initDb = () => {
-    mongoose.connect("mongodb://100.71.52.17:27017/netCare")
+    mongoose.connect("mongodb://adi-makdasi.tail2be12f.ts.net:27017/netCare")
     .then(() => {
         console.log("Connected to db")
     })

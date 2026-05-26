@@ -262,7 +262,7 @@ class TopologyRanker:
 
         solve_result = solver.solve(
             demand
-        )
+        )   
 
         self._solve_cache[
             cache_key

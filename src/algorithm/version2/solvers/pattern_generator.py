@@ -165,25 +165,58 @@ class PatternGenerator:
 
         return total
 
-    def _is_pattern_useful(self, pattern: Pattern) -> bool:
-        """
-        Reject obviously weak patterns.
-        """
-        util = pattern.utilization_ratios()
-        avg_util = (util["u"] + util["watt"] + util["ports"]) / 3.0
-        total_items = pattern.total_items()
+    def _is_pattern_useful(
+        self,
+        pattern: Pattern,
+    ) -> bool:
 
-        if total_items <= 0:
+        util=pattern.utilization_ratios()
+
+        avg_util=(
+            util["u"]+
+            util["watt"]+
+            util["ports"]
+        )/3.0
+
+        spread=max(util.values())-min(util.values())
+
+        total_items=pattern.total_items()
+
+        if total_items<=0:
             return False
 
-        if avg_util < 0.05:
+        if avg_util<0.08:
             return False
 
-        if total_items == 1 and avg_util < 0.10:
+        if spread>0.85:
+            return False
+
+        counts=pattern.counts
+
+        non_zero=sum([
+            1 if counts.pc>0 else 0,
+            1 if counts.switch>0 else 0,
+            1 if counts.router>0 else 0,
+            1 if counts.controller>0 else 0,
+        ])
+
+        if non_zero==1 and total_items>4:
+            return False
+
+        dominant_share=max(
+            counts.pc,
+            counts.switch,
+            counts.router,
+            counts.controller,
+        )/max(total_items,1)
+
+        if dominant_share>0.90:
+            return False
+
+        if counts.pc>0 and counts.switch==0:
             return False
 
         return True
-
     def _pattern_score(self, pattern: Pattern) -> float:
         """
         Score patterns for solver-friendly ordering.

@@ -11,9 +11,9 @@ class FNNTopology(TopologyBase):
     name = "Flat Neighborhood Network"
 
     # 0..10 scale
-    Scalability = 6.5
-    Redundancy = 6.0
-    Cost = 2.5
+    Scalability = 65
+    Redundancy = 60
+    Cost = 25
 
     def normalize(self, params: Dict[str, Any]) -> Dict[str, int]:
         pcs = int(params.get("pcs", 0))

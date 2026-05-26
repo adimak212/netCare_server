@@ -43,7 +43,7 @@ export function rawDataToString(data: RawData): string {
 wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
   // ws://localhost:3000/ws/console?host=172.20.10.14&port=5021
   const url = new URL(req.url ?? "", "http://localhost");
-  const host = url.searchParams.get("host") ?? "172.20.10.14";
+  const host = "100.71.52.17"//url.searchParams.get("host") ?? "172.20.10.14";
   const port = Number(url.searchParams.get("port"));
 
   if (!port || Number.isNaN(port)) {
@@ -90,6 +90,6 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server listening on port ${PORT}`);
 });

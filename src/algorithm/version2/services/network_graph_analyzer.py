@@ -5,30 +5,61 @@ from typing import Dict, List, Set, Any
 
 
 class NetworkGraphAnalyzer:
-
     def analyze(
         self,
         links: List[Dict[str, Any]],
     ) -> Dict[str, float]:
 
-        adjacency = self._build_adjacency(links)
+        adjacency = self._build_adjacency(
+            links
+        )
 
-        connectivity_score = self._connectivity_score(adjacency)
+        connectivity_score = (
+            self._connectivity_score(
+                adjacency
+            )
+        )
 
-        diameter_score = self._diameter_score(adjacency)
+        diameter_score = (
+            self._diameter_score(
+                adjacency
+            )
+        )
 
-        bottleneck_penalty = self._bottleneck_penalty(adjacency)
+        bottleneck_penalty = (
+            self._centralization_penalty(
+                adjacency
+            )
+        )
 
-        degree_balance_score = self._degree_balance_score(adjacency)
-
-        resilience_score = self._resilience_score(adjacency)
+        degree_balance_score = (
+            self._degree_balance_score(
+                adjacency
+            )
+        )
+        resilience_score = (
+            self._resilience_score(
+                adjacency
+            )
+        )
+        edge_count = len(links)
+        node_count = len(adjacency)
 
         return {
-            "connectivity_score": connectivity_score,
-            "diameter_score": diameter_score,
-            "bottleneck_penalty": bottleneck_penalty,
-            "degree_balance_score": degree_balance_score,
-            "resilience_score": resilience_score,
+            "connectivity_score":
+                connectivity_score,
+            "diameter_score":
+                diameter_score,
+            "centralization_penalty":
+                bottleneck_penalty,
+            "degree_balance_score":
+                degree_balance_score,
+            "resilience_score":
+                resilience_score,
+            "edge_count":
+                edge_count,
+            "node_count":
+                node_count,
         }
 
     def _build_adjacency(
@@ -89,7 +120,7 @@ class NetworkGraphAnalyzer:
             1.0 - normalized_imbalance
         )
 
-    def _bottleneck_penalty(
+    def _centralization_penalty(
         self,
         adjacency: Dict[str, Set[str]],
     ) -> float:
@@ -97,17 +128,35 @@ class NetworkGraphAnalyzer:
         if not adjacency:
             return 0.0
 
-        max_degree = max(
+        degrees = [
             len(neighbors)
             for neighbors in adjacency.values()
+        ]
+
+        avg_degree = (
+            sum(degrees) /
+            len(degrees)
         )
 
-        total_nodes = max(len(adjacency), 1)
+        variance = (
 
-        bottleneck_ratio = max_degree / total_nodes
+            sum(
+                (d - avg_degree) ** 2
+                for d in degrees
+            )
 
-        return self._clamp01(bottleneck_ratio)
+            / len(degrees)
 
+        )
+
+        normalized = variance / max(
+            avg_degree ** 2,
+            1,
+        )
+
+        return self._clamp01(
+            normalized
+        )
     def _diameter_score(
         self,
         adjacency: Dict[str, Set[str]],

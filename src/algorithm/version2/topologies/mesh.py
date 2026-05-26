@@ -11,9 +11,9 @@ class MeshTopology(TopologyBase):
     name = "Mesh"
 
     # 0..10 scale
-    Scalability = 8.5
-    Redundancy = 9.5
-    Cost = 8.0
+    Scalability = 85
+    Redundancy = 95
+    Cost = 80
 
     switches_per_router = 2
 

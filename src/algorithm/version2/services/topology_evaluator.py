@@ -161,91 +161,101 @@ class TopologyEvaluator:
 
     def evaluate(
         self,
-        topology_key: str,
-        topology_name: str,
-        demand: DemandVector,
-        preferences: UserPreferences,
-        topology_metrics: dict[str, float],
-        unit_costs: dict[str, float],
-        rack_count: int,
-        waste_score: float,
-    ) -> TopologyEvaluation:
+        topology_key:str,
+        topology_name:str,
+        demand:DemandVector,
+        preferences:UserPreferences,
+        topology_metrics:dict[str,float],
+        unit_costs:dict[str,float],
+        rack_count:int,
+        waste_score:float,
+    )->TopologyEvaluation:
 
-        ws, wr, wc = preferences.normalized_importance()
+        ws,wr,wc=preferences.normalized_importance()
 
-        scalability_raw = topology_metrics.get(
-            "scalability",
-            0.0,
+        scalability_norm=self._clamp01(
+            topology_metrics.get("scalability",0.0)/
+            self.MAX_SCORE_10
         )
 
-        redundancy_raw = topology_metrics.get(
-            "redundancy",
-            0.0,
+        redundancy_norm=self._clamp01(
+            topology_metrics.get("redundancy",0.0)/
+            self.MAX_SCORE_10
         )
 
-        logical_cost_raw = topology_metrics.get(
+        logical_cost_raw=topology_metrics.get(
             "logical_cost",
             0.0,
         )
 
-        connectivity_score = topology_metrics.get(
+        connectivity_score=topology_metrics.get(
             "connectivity_score",
             0.0,
         )
 
-        resilience_score = topology_metrics.get(
+        resilience_score=topology_metrics.get(
             "resilience_score",
-            0.0,
+            0.20,
         )
 
-        degree_balance_score = topology_metrics.get(
+        degree_balance_score=topology_metrics.get(
             "degree_balance_score",
             0.0,
         )
 
-        diameter_score = topology_metrics.get(
+        diameter_score=topology_metrics.get(
             "diameter_score",
             0.0,
         )
 
-        bottleneck_penalty = topology_metrics.get(
-            "bottleneck_penalty",
+        centralization_penalty=topology_metrics.get(
+            "centralization_penalty",
             0.0,
         )
 
-        scalability_norm = self._clamp01(
-            scalability_raw / self.MAX_SCORE_10
+        edge_count=topology_metrics.get(
+            "edge_count",
+            0.0,
         )
 
-        redundancy_norm = self._clamp01(
-            redundancy_raw / self.MAX_SCORE_10
+        node_count=max(
+            topology_metrics.get(
+                "node_count",
+                demand.pc,
+            ),
+            1,
         )
 
-        graph_quality_score = self._clamp01(
-            (
-                connectivity_score * 0.30 +
-                resilience_score * 0.30 +
-                degree_balance_score * 0.20 +
-                diameter_score * 0.20
+        edge_density=self._clamp01(
+            (2*edge_count)/
+            max(node_count*(node_count-1),1)
+        )
+
+        density_penalty=edge_density**2
+
+        link_cost=edge_count*35
+
+        equipment_cost=(
+            self.compute_equipment_cost(
+                demand=demand,
+                unit_costs=unit_costs,
+            )+
+            link_cost
+        )
+
+        fair_cost_norm=(
+            self.compute_fair_cost_norm(
+                logical_cost_score=logical_cost_raw,
+                equipment_cost=equipment_cost,
+                rack_count=rack_count,
+                waste_score=waste_score,
+                demand=demand,
+                scalability_norm=scalability_norm,
+                redundancy_norm=redundancy_norm,
             )
         )
 
-        equipment_cost = self.compute_equipment_cost(
-            demand=demand,
-            unit_costs=unit_costs,
-        )
-
-        fair_cost_norm = self.compute_fair_cost_norm(
-            logical_cost_score=logical_cost_raw,
-            equipment_cost=equipment_cost,
-            rack_count=rack_count,
-            waste_score=waste_score,
-            demand=demand,
-            scalability_norm=scalability_norm,
-            redundancy_norm=redundancy_norm,
-        )
-
-        resource_penalty_norm = (
+        resource_penalty_norm=(
             self.compute_resource_penalty_norm(
                 demand=demand,
                 equipment_cost=equipment_cost,
@@ -254,97 +264,81 @@ class TopologyEvaluator:
             )
         )
 
-        graph_weight = 0.25
-        bottleneck_weight = 0.15
-
-        total_weight = (
-            ws +
-            wr +
-            wc +
-            self.resource_penalty_weight +
-            graph_weight +
-            bottleneck_weight
+        graph_score=self._clamp01(
+            connectivity_score*0.20+
+            resilience_score*0.20+
+            degree_balance_score*0.15+
+            diameter_score*0.15+
+            (1-centralization_penalty)*0.20+
+            (1-density_penalty)*0.10
         )
 
-        if total_weight == 0:
-            ws_n = 1.0 / 5.0
-            wr_n = 1.0 / 5.0
-            wc_n = 1.0 / 5.0
-            wg_n = 1.0 / 5.0
-            wb_n = 1.0 / 5.0
-            we_n = 0.0
-
-        else:
-            ws_n = ws / total_weight
-            wr_n = wr / total_weight
-            wc_n = wc / total_weight
-
-            wg_n = graph_weight / total_weight
-
-            wb_n = bottleneck_weight / total_weight
-
-            we_n = (
-                self.resource_penalty_weight /
-                total_weight
-            )
-
-        ideal_vector = {
-            "scalability": 1.0,
-            "redundancy": 1.0,
-            "graph_quality": 1.0,
-            "cost": 0.0,
-            "resource_penalty": 0.0,
-            "bottleneck": 0.0,
-        }
-
-        distance = math.sqrt(
-
-            ws_n * (
-                scalability_norm -
-                ideal_vector["scalability"]
-            ) ** 2 +
-
-            wr_n * (
-                redundancy_norm -
-                ideal_vector["redundancy"]
-            ) ** 2 +
-
-            wg_n * (
-                graph_quality_score -
-                ideal_vector["graph_quality"]
-            ) ** 2 +
-
-            wc_n * (
-                fair_cost_norm -
-                ideal_vector["cost"]
-            ) ** 2 +
-
-            we_n * (
-                resource_penalty_norm -
-                ideal_vector["resource_penalty"]
-            ) ** 2 +
-
-            wb_n * (
-                bottleneck_penalty -
-                ideal_vector["bottleneck"]
-            ) ** 2
+        resource_score=self._clamp01(
+            (1-fair_cost_norm)*0.45+
+            (1-resource_penalty_norm)*0.45+
+            (1-density_penalty)*0.10
         )
 
-        max_distance = math.sqrt(
-            ws_n +
-            wr_n +
-            wg_n +
-            wc_n +
-            we_n +
-            wb_n
+        scalability_target=ws/100
+        redundancy_target=wr/100
+        cost_target=wc/100
+
+        scalability_match=1.0-abs(
+            scalability_norm-
+            scalability_target
         )
 
-        normalized_distance = (
-            distance / max_distance
+        redundancy_match=1.0-abs(
+            redundancy_norm-
+            redundancy_target
         )
 
-        final_score = self._clamp01(
-            1.0 - normalized_distance
+        cost_match=1.0-abs(
+            (1-fair_cost_norm)-
+            cost_target
+        )
+
+        user_preference_score=self._clamp01(
+            scalability_match*0.40+
+            redundancy_match*0.40+
+            cost_match*0.20
+        )
+
+        architecture_fit=0.0
+
+        if demand.pc>=15:
+            if topology_key=="fat_tree":
+                architecture_fit+=0.05
+            if topology_key=="mesh":
+                architecture_fit-=0.05
+
+        if demand.pc<=10:
+            if topology_key=="mesh":
+                architecture_fit+=0.08
+            if topology_key=="sdn":
+                architecture_fit+=0.05
+
+        if wc>=70:
+            if topology_key=="fnn":
+                architecture_fit+=0.08
+            if topology_key=="mesh":
+                architecture_fit-=0.05
+
+        if ws>=70:
+            if topology_key=="fat_tree":
+                architecture_fit+=0.08
+            if topology_key=="sdn":
+                architecture_fit+=0.05
+
+        if wr>=70:
+            if topology_key=="mesh":
+                architecture_fit+=0.05
+
+        final_score=self._clamp01(
+            graph_score*0.30+
+            resource_score*0.50+
+            user_preference_score*0.20+
+            architecture_fit
         )
 
         return TopologyEvaluation(
@@ -354,7 +348,7 @@ class TopologyEvaluator:
             scalability_score=scalability_norm,
             redundancy_score=redundancy_norm,
             logical_cost_score=self._clamp01(
-                logical_cost_raw / self.MAX_SCORE_10
+                logical_cost_raw/self.MAX_SCORE_10
             ),
             equipment_cost=equipment_cost,
             rack_count=rack_count,

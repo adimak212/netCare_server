@@ -29,7 +29,7 @@ class BeamPatternSolver:
     def __init__(
         self,
         patterns: List[Pattern],
-        beam_width: int = 5,
+        beam_width: int = 15,
         max_steps: int = 50,
     ):
         self.patterns = patterns
